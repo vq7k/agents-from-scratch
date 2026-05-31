@@ -1,65 +1,65 @@
-# Contributing to AI Agents from Scratch
+# 为「从零构建 AI Agent」做贡献
 
-Thank you for your interest in contributing! This repository has a specific educational philosophy, so please read this guide carefully before contributing.
+感谢你有意参与贡献!本仓库秉持一套特定的教学理念,因此在贡献之前,请仔细阅读本指南。
 
-## Philosophy First
+## 理念优先
 
-This repository prioritizes:
-1. **Clarity over cleverness**
-2. **Progressive complexity**
-3. **Mechanical understanding**
-4. **No magic, no hype**
+本仓库优先考虑:
+1. **清晰胜过小聪明**
+2. **渐进式复杂度**
+3. **机制层面的理解**
+4. **无魔法、无炒作**
 
-Every contribution should make the learning experience **better**, not just add features.
+每一份贡献都应当让学习体验**更好**,而不只是增加功能。
 
-## What We Welcome
+## 我们欢迎什么
 
-### ✅ Good Contributions
+### ✅ 好的贡献
 
-- **Bug fixes** in existing code
-- **Clarifications** in lesson explanations
-- **Better examples** that illustrate concepts
-- **Additional exercises** at the end of lessons
-- **Documentation improvements**
-- **Typo fixes and grammar improvements**
-- **Translation** of lessons to other languages
+- 修复现有代码中的 **bug**
+- **澄清**课程讲解中含糊之处
+- 更能说明概念的**更好示例**
+- 在课程末尾增加**额外的练习**
+- **文档改进**
+- **错别字修正与语法改进**
+- 把课程**翻译**成其他语言
 
-### ⚠️ Needs Discussion First
+### ⚠️ 需要先讨论
 
-These might be good ideas, but need careful thought:
-- **New lessons** - must fit the progression
-- **Alternative approaches** - must preserve simplicity
-- **Framework integrations** - goes against the philosophy
-- **Advanced features** - might break the learning flow
+下面这些也许是好主意,但需要慎重考虑:
+- **新课程** —— 必须契合整体的递进顺序
+- **替代方案** —— 必须保持简单
+- **框架集成** —— 与本仓库的理念相悖
+- **高级特性** —— 可能会打断学习节奏
 
-### ❌ We Will Not Accept
+### ❌ 我们不会接受
 
-- Additions that require external APIs
-- Framework dependencies (LangChain, CrewAI, etc.)
-- "Smart" abstractions that hide mechanisms
-- Chain-of-thought or hidden reasoning
-- Anthropomorphic language ("the agent thinks...")
-- Hype-driven features without pedagogical value
+- 需要外部 API 的增补
+- 框架依赖(LangChain、CrewAI 等)
+- 把机制藏起来的「智能」抽象
+- 思维链(chain-of-thought)或隐藏的推理
+- 拟人化的语言(「Agent 在思考……」)
+- 没有教学价值、只为炒作而生的特性
 
-## Contribution Guidelines
+## 贡献准则
 
-### 1. Code Style
+### 1. 代码风格
 
-**Python Code:**
-- Follow PEP 8
-- Use type hints
-- Write docstrings for all functions
-- Prefer readability over brevity
-- Comment "why," not "what"
+**Python 代码:**
+- 遵循 PEP 8
+- 使用类型注解(type hints)
+- 为所有函数编写 docstring
+- 可读性优先于简短
+- 注释「为什么」,而不是「是什么」
 
-**Example:**
+**示例:**
 ```python
 def safe_json_parse(text: str) -> dict | None:
     """
-    Safely parse JSON text, returning None on failure.
-    
-    This handles the common case where LLMs add extra text
-    around JSON, making direct parsing fail.
+    安全地解析 JSON 文本,失败时返回 None。
+
+    这能处理一种常见情况:LLM 在 JSON 周围添加了额外文本,
+    导致直接解析失败。
     """
     try:
         return json.loads(text)
@@ -67,104 +67,104 @@ def safe_json_parse(text: str) -> dict | None:
         return None
 ```
 
-### 2. Lesson Writing Style
+### 2. 课程写作风格
 
-**Principles:**
-- Start with the question being answered
-- Introduce one concept at a time
-- Use concrete examples
-- Avoid jargon without explanation
-- End with key takeaways
+**原则:**
+- 从正在回答的那个问题开始
+- 一次只引入一个概念
+- 使用具体的示例
+- 不使用未加解释的术语黑话
+- 以关键要点收尾
 
-**Structure:**
+**结构:**
 ```markdown
-# Lesson XX  -  Title
+# 第 XX 课  -  标题
 
-## What Question Are We Answering?
+## 我们在回答什么问题?
 
-## What You Will Build
+## 你将构建什么
 
-## New Concepts Introduced
+## 引入的新概念
 
-## What We Are NOT Doing (Yet)
+## 我们(暂时)不做什么
 
-## The Code
+## 代码
 
-## How to Run
+## 如何运行
 
-## Key Insights
+## 关键洞见
 
-## Common Issues
+## 常见问题
 
-## Exercises
+## 练习
 
-## What's Next?
+## 下一步是什么?
 
 ---
 
-**Key Takeaway:**
+**关键要点:**
 ```
 
-### 3. Commit Messages
+### 3. 提交信息(commit message)
 
-Use clear, descriptive commit messages:
+使用清晰、有描述性的提交信息:
 
 ```
-Good:
+好的:
 - "Fix JSON parsing in lesson 03 example"
 - "Clarify memory explanation in lesson 07"
 - "Add exercise for testing different temperatures"
 
-Bad:
+差的:
 - "Update"
 - "Fix bug"
 - "Changes"
 ```
 
-## How to Contribute
+## 如何贡献
 
-### 1. Small Changes (Typos, Small Fixes)
+### 1. 小改动(错别字、小修复)
 
-For small changes:
-1. Fork the repository
-2. Make your changes
-3. Submit a pull request with a clear description
+对于小改动:
+1. Fork 本仓库
+2. 做出你的修改
+3. 提交一个带有清晰描述的 pull request
 
-### 2. Larger Changes (New Examples, Lessons)
+### 2. 较大改动(新示例、新课程)
 
-For larger contributions:
-1. **Open an issue first** to discuss the idea
-2. Wait for maintainer feedback
-3. If approved, fork and implement
-4. Submit a pull request
+对于较大的贡献:
+1. **先开一个 issue** 来讨论这个想法
+2. 等待维护者的反馈
+3. 如果获得认可,再 fork 并实现
+4. 提交一个 pull request
 
-### 3. Testing Your Changes
+### 3. 测试你的改动
 
-Before submitting:
-- Test all code examples work
-- Verify markdown renders correctly
-- Check that changes don't break the lesson progression
-- Run through the lessons as a learner would
+提交之前:
+- 测试所有代码示例都能正常运行
+- 确认 markdown 渲染正确
+- 检查改动不会破坏课程的递进顺序
+- 以学习者的视角把课程从头走一遍
 
-## Code Review Process
+## 代码评审流程
 
-We will review for:
-1. **Pedagogical value** - Does this help learning?
-2. **Simplicity** - Is it as simple as possible?
-3. **Consistency** - Does it fit the existing style?
-4. **Correctness** - Does the code work?
+我们会从以下方面进行评审:
+1. **教学价值** —— 这对学习有帮助吗?
+2. **简单性** —— 它是否已经尽可能简单?
+3. **一致性** —— 它是否契合现有风格?
+4. **正确性** —— 代码能正常工作吗?
 
-## Questions?
+## 有问题?
 
-- **For bugs:** Open an issue with steps to reproduce
-- **For features:** Open an issue to discuss first
-- **For questions:** Use GitHub Discussions
+- **报告 bug:** 开一个 issue,并附上复现步骤
+- **提议特性:** 先开一个 issue 来讨论
+- **提问:** 使用 GitHub Discussions
 
-## Recognition
+## 致谢
 
-Contributors will be:
-- Added to CONTRIBUTORS.md
-- Mentioned in release notes
-- Credited in the repository
+贡献者将会:
+- 被加入 CONTRIBUTORS.md
+- 在发布说明(release notes)中被提及
+- 在仓库中获得署名
 
-Thank you for helping make AI agent education better!
+感谢你帮助让 AI Agent 教育变得更好!

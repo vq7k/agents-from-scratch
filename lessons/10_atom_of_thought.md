@@ -1,56 +1,56 @@
-# Lesson 10  -  AoT (Atom of Thought)  -  Now It Makes Sense
+# 第 10 课  -  AoT(思维原子,Atom of Thought)  -  现在一切都说得通了
 
-## What Question Are We Answering?
+## 我们要回答什么问题?
 
-**"How do I scale planning without losing control?"**
+**「如何在不失去控制的前提下扩展规划?」**
 
-Complex tasks need many actions with dependencies. Some actions can run in parallel, others must wait. AoT (Atom of Thought) creates dependency graphs that enable safe, efficient execution of complex workflows.
+复杂任务需要许多带依赖关系的动作。有些动作可以并行运行,有些则必须等待。AoT(思维原子,Atom of Thought)创建依赖图(dependency graph),从而安全、高效地执行复杂工作流。
 
-## What You Will Build
+## 你将构建什么
 
-An AoT system that:
-- Creates dependency graphs with nodes and dependencies
-- Validates graph structure before execution
-- Executes actions respecting dependencies
-- Enables parallel execution of independent actions
+一个 AoT 系统,它能够:
+- 创建包含节点(node)和依赖关系的依赖图
+- 在执行前校验图结构
+- 在执行动作时遵守依赖关系
+- 让相互独立的动作可以并行执行
 
-## New Concepts Introduced
+## 引入的新概念
 
-### 1. Atomic Planning
+### 1. 原子化规划(Atomic Planning)
 
-**Atomic planning** means creating plans as dependency graphs where each node is an atomic action. Nodes can depend on other nodes, creating an explicit execution order.
+**原子化规划**意味着把计划构建成依赖图,其中每个节点都是一个原子动作。节点可以依赖其他节点,从而形成明确的执行顺序。
 
-This is the natural combination of Lesson 08's planning and Lesson 09's atomic actions, with added dependency tracking.
+这是第 08 课的规划与第 09 课的原子动作的自然结合,再加上依赖追踪。
 
-### 2. Dependency Resolution
+### 2. 依赖解析(Dependency Resolution)
 
-**Dependency resolution** determines the correct execution order. Actions with no dependencies can run immediately. Actions with dependencies wait for their dependencies to complete.
+**依赖解析**用于确定正确的执行顺序。没有依赖的动作可以立即运行;有依赖的动作则要等待其依赖项完成。
 
-This enables parallel execution of independent actions while respecting ordering constraints.
+这使得相互独立的动作能够并行执行,同时遵守顺序约束。
 
-### 3. Validated Execution
+### 3. 校验式执行(Validated Execution)
 
-**Validated execution** means checking the graph structure before running it. Are all dependencies valid? Is there a circular dependency? Are all required nodes present?
+**校验式执行**意味着在运行之前检查图结构。所有依赖是否有效?是否存在循环依赖?所有必需节点是否都在?
 
-Validation catches structural errors before execution begins.
+校验能在执行开始前捕获结构性错误。
 
-## The Code
+## 代码
 
-Look at `agent/planner.py`, see `create_aot_graph()` function:
+查看 `agent/planner.py` 中的 `create_aot_graph()` 函数:
 
 ```python
 def create_aot_graph(llm: LocalLLM, goal: str) -> dict | None:
     """
-    Generate an AoT execution graph.
+    生成一张 AoT 执行图。
     
-    Used in: Lesson 10
+    用于:第 10 课
     
     Args:
-        llm: The language model to use
-        goal: The goal to achieve
+        llm: 要使用的语言模型
+        goal: 要达成的目标
         
     Returns:
-        AoT graph with nodes and dependencies, or None if generation failed
+        包含节点和依赖关系的 AoT 图;若生成失败则返回 None
     """
     from shared.utils import extract_json_from_text
     
@@ -83,14 +83,14 @@ Response (JSON only):"""
         graph = extract_json_from_text(response)
         
         if graph and "nodes" in graph and isinstance(graph["nodes"], list):
-            # Validate node structure
+            # 校验节点结构
             node_ids = set()
             for node in graph["nodes"]:
                 if "id" not in node or "action" not in node or "depends_on" not in node:
                     break
                 node_ids.add(node["id"])
             else:
-                # All nodes valid, check dependencies reference valid nodes
+                # 所有节点都有效,检查依赖是否引用了有效节点
                 for node in graph["nodes"]:
                     for dep in node.get("depends_on", []):
                         if dep not in node_ids:
@@ -104,49 +104,49 @@ Response (JSON only):"""
     return None
 ```
 
-And in `agent/agent.py`:
+以及 `agent/agent.py` 中:
 
 ```python
 def create_aot_plan(self, goal: str) -> dict | None:
     """
-    Generate an AoT execution graph.
+    生成一张 AoT 执行图。
     
-    Lesson 10 version.
+    第 10 课版本。
     
     Args:
-        goal: The goal to achieve
+        goal: 要达成的目标
         
     Returns:
-        AoT graph with atomic nodes and dependencies
+        包含原子节点和依赖关系的 AoT 图
     """
     return create_aot_graph(self.llm, goal)
 
 def execute_aot_plan(self, graph: dict) -> list:
     """
-    Execute an AoT graph respecting dependencies.
+    在遵守依赖关系的前提下执行一张 AoT 图。
     
     Args:
-        graph: AoT graph
+        graph: AoT 图
         
     Returns:
-        List of execution results
+        执行结果列表
     """
     def execute_action(action: str):
-        # Placeholder for actual action execution
+        # 实际动作执行的占位实现
         return f"Executed: {action}"
     
     return execute_graph(graph, execute_action)
 ```
 
-Notice:
-- **Graph structure** - Nodes with IDs, actions, and dependencies
-- **Validation** - Checks that all dependencies reference valid nodes
-- **Dependency resolution** - The execute_graph function handles ordering
-- **Extensibility** - Easy to add parallel execution later
+注意:
+- **图结构** —— 节点带有 ID、动作和依赖关系
+- **校验** —— 检查所有依赖是否引用了有效节点
+- **依赖解析** —— execute_graph 函数负责处理顺序
+- **可扩展性** —— 之后很容易加入并行执行
 
-## How to Run
+## 如何运行
 
-Look at `complete_example.py`, see `lesson_10_aot()` method:
+查看 `complete_example.py` 中的 `lesson_10_aot()` 方法:
 
 ```python
 from agent.agent import Agent
@@ -161,17 +161,17 @@ if graph:
     print(f"Execution results: {results}")
 ```
 
-![Atom of Thought Graph](diagrams/lesson-10-atom-of-thoght.png)
+![思维原子图](diagrams/lesson-10-atom-of-thoght.png)
 
-## Compare to Lesson 09
+## 与第 09 课的对比
 
-**Lesson 09 (Atomic Actions):**
+**第 09 课(原子动作):**
 ```
 Step -> Atomic action: {"action": "...", "inputs": {...}}
 ```
-Single step converted to atomic action.
+单个步骤被转换成原子动作。
 
-**Lesson 10 (AoT):**
+**第 10 课(AoT):**
 ```
 Goal -> Graph: {
   nodes: [
@@ -180,73 +180,73 @@ Goal -> Graph: {
   ]
 }
 ```
-Multiple atomic actions with explicit dependencies.
+多个原子动作,带有明确的依赖关系。
 
-## Key Insights
+## 关键洞见
 
-### AoT is Inevitable
+### AoT 是水到渠成的
 
-At this point, AoT feels **inevitable**, not advanced. It's the natural evolution of planning (Lesson 08), atomic actions (Lesson 09), and adding dependencies. Once you understand the pieces, the graph structure makes perfect sense.
+到了这一步,AoT 给人的感觉是**水到渠成**,而非高深莫测。它是规划(第 08 课)、原子动作(第 09 课)再加上依赖关系的自然演进。一旦你理解了这些组成部分,图结构便顺理成章。
 
-### It's Not Advanced Reasoning
+### 它不是高级推理
 
-AoT isn't smarter thinking - it's **better structure**:
-- Each node is validated (from Lesson 09)
-- Dependencies are explicit (new in this lesson)
-- Execution is deterministic (respecting order)
-- Failures are contained (to individual nodes)
+AoT 不是更聪明的思考,而是**更好的结构**:
+- 每个节点都经过校验(来自第 09 课)
+- 依赖关系是明确的(本课新增)
+- 执行是确定的(遵守顺序)
+- 失败是被隔离的(限定在单个节点内)
 
-### Structure Enables Scale
+### 结构带来扩展能力
 
-By adding dependencies, you can handle complex workflows with many actions. Dependencies enable:
-- Parallel execution of independent actions
-- Clear execution order
-- Easier debugging (know what depends on what)
+通过加入依赖关系,你就能处理含有大量动作的复杂工作流。依赖关系带来:
+- 相互独立的动作可以并行执行
+- 清晰的执行顺序
+- 更容易调试(知道谁依赖谁)
 
-### Validation is Key
+### 校验是关键
 
-The graph structure must be validated before execution. Circular dependencies, missing nodes, or invalid references must be caught early.
+图结构必须在执行前经过校验。循环依赖、缺失节点或无效引用都必须尽早被捕获。
 
-## Common Issues
+## 常见问题
 
-**"Circular dependencies"**
-- The validation should catch this
-- Check that dependencies form a directed acyclic graph (DAG)
-- Consider adding cycle detection to validation
+**「循环依赖」**
+- 校验应当能捕获这一点
+- 检查依赖关系是否构成一张有向无环图(DAG)
+- 考虑在校验中加入环检测
 
-**"Dependencies reference non-existent nodes"**
-- Validation checks for this
-- Ensure all node IDs in dependencies exist in the graph
-- Consider generating IDs more systematically
+**「依赖引用了不存在的节点」**
+- 校验会检查这一点
+- 确保依赖中的所有节点 ID 都存在于图中
+- 考虑以更系统化的方式生成 ID
 
-**"Execution order seems wrong"**
-- Verify dependencies are correctly specified
-- Check that execute_graph respects dependencies
-- Consider adding execution logging to see order
+**「执行顺序看起来不对」**
+- 确认依赖关系指定正确
+- 检查 execute_graph 是否遵守依赖关系
+- 考虑加入执行日志以查看顺序
 
-## Exercises
+## 练习
 
-1. Create graphs with different dependency structures
-2. Try to create a circular dependency and see if validation catches it
-3. Compare execution order with and without dependencies
-4. Experiment with parallel vs sequential execution
+1. 创建具有不同依赖结构的图
+2. 尝试构造一个循环依赖,看校验能否捕获它
+3. 对比有依赖和无依赖时的执行顺序
+4. 试验并行执行与顺序执行
 
-## Final Insight
+## 最终洞见
 
-You've now built an agent that:
-1. Talks to an LLM ([Lesson 01](01_basic_llm_chat.md))
-2. Has consistent behavior ([Lesson 02](02_system_prompt.md))
-3. Produces validated outputs ([Lesson 03](03_structured_output.md))
-4. Makes decisions ([Lesson 04](04_decision_making.md))
-5. Uses tools ([Lesson 05](05_tools.md))
-6. Runs in a loop ([Lesson 06](06_agent_loop.md))
-7. Remembers things ([Lesson 07](07_memory.md))
-8. Plans actions ([Lesson 08](08_planning.md))
-9. Executes safely ([Lesson 09](09_atomic_actions.md))
-10. Scales with dependencies ([Lesson 10](10_atom_of_thought.md))
+你现在已经构建出一个 Agent,它能够:
+1. 与 LLM 对话([第 01 课](01_basic_llm_chat.md))
+2. 拥有一致的行为([第 02 课](02_system_prompt.md))
+3. 产出经过校验的输出([第 03 课](03_structured_output.md))
+4. 做出决策([第 04 课](04_decision_making.md))
+5. 使用工具([第 05 课](05_tools.md))
+6. 在循环中运行([第 06 课](06_agent_loop.md))
+7. 记住事情([第 07 课](07_memory.md))
+8. 规划动作([第 08 课](08_planning.md))
+9. 安全地执行([第 09 课](09_atomic_actions.md))
+10. 借助依赖关系实现扩展([第 10 课](10_atom_of_thought.md))
 
-And you understand **exactly how it all works**. No magic, no hidden reasoning - just structure, validation, and explicit execution.
+并且你**确切地理解了这一切是如何运作的**。没有魔法,没有隐藏的推理——只有结构、校验和明确的执行。
 
 ---
 
-**Key Takeaway:** AoT is structure, not magic. Agents are systems, not minds. Dependency graphs enable complex workflows while maintaining control and predictability.
+**核心要点:** AoT 是结构,不是魔法。Agent 是系统,不是头脑。依赖图让复杂工作流成为可能,同时保持控制力与可预测性。

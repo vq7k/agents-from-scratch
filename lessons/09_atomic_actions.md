@@ -1,65 +1,65 @@
-# Lesson 09  -  Atomic Steps & Safe Execution
+# 第 09 课  -  原子化步骤与安全执行
 
-## What Question Are We Answering?
+## 我们要回答什么问题?
 
-**"How do I make plans safe and predictable?"**
+**「如何让计划变得安全且可预测?」**
 
-Plan steps like "Write article" are vague and hard to validate. Atomic actions break steps into the smallest possible, well-defined operations that can be validated and executed safely.
+像「写一篇文章」这样的计划步骤含糊不清,难以校验。原子动作(atomic actions)把步骤拆解成尽可能小、定义明确的操作,从而可以被校验并安全执行。
 
-## What You Will Build
+## 你将构建什么
 
-An atomic action system that:
-- Converts vague plan steps into specific, typed actions
-- Validates actions before execution
-- Uses schemas to ensure correct parameters
-- Makes execution predictable and debuggable
+一个原子动作系统,它能够:
+- 把含糊的计划步骤转换成具体的、带类型的动作
+- 在执行前对动作进行校验
+- 用 schema 确保参数正确
+- 让执行过程可预测、可调试
 
-## New Concepts Introduced
+## 引入的新概念
 
-### 1. Atomicity
+### 1. 原子性(Atomicity)
 
-**Atomicity** means breaking actions into the smallest possible units. Instead of "Write article," you get "generate_text" with specific parameters like topic and length.
+**原子性**意味着把动作拆解成尽可能小的单元。不再是「写一篇文章」,而是「generate_text」配上具体参数,比如主题(topic)和长度(length)。
 
-Atomic actions are indivisible - they either succeed completely or fail completely, with no partial states.
+原子动作是不可分割的——要么完整成功,要么完整失败,不存在中间的部分状态。
 
-### 2. Determinism
+### 2. 确定性(Determinism)
 
-**Determinism** means predictable outcomes. Given the same atomic action with the same inputs, you should get similar results (accounting for LLM randomness).
+**确定性**意味着结果可预测。对同一个原子动作给定相同的输入,你应当得到相近的结果(考虑到 LLM 本身的随机性)。
 
-Atomic actions make execution deterministic by removing ambiguity.
+原子动作通过消除歧义,让执行变得确定。
 
-### 3. Typed Execution
+### 3. 类型化执行(Typed Execution)
 
-**Typed execution** means actions have validated schemas. Each action specifies:
-- Action name (e.g., "generate_text")
-- Required inputs (e.g., {"topic": string, "length": string})
-- Validation rules
+**类型化执行**意味着动作带有经过校验的 schema。每个动作都要指定:
+- 动作名称(例如 "generate_text")
+- 必需的输入(例如 {"topic": string, "length": string})
+- 校验规则
 
-This catches errors before execution.
+这能在执行前就捕获错误。
 
-## What We Are NOT Doing (Yet)
+## 我们(暂时)不做什么
 
-- No dependency handling between actions ([Lesson 10](10_atom_of_thought.md))
-- No parallel execution
-- No action execution implementation - just conversion and validation
+- 不处理动作之间的依赖关系([第 10 课](10_atom_of_thought.md))
+- 不做并行执行
+- 不实现动作的实际执行——只做转换和校验
 
-## The Code
+## 代码
 
-Look at `agent/planner.py`, see `create_atomic_action()` function:
+查看 `agent/planner.py` 中的 `create_atomic_action()` 函数:
 
 ```python
 def create_atomic_action(llm: LocalLLM, step: str) -> dict | None:
     """
-    Convert a plan step into an atomic action.
+    把一个计划步骤转换成原子动作。
     
-    Used in: Lesson 09
+    用于:第 09 课
     
     Args:
-        llm: The language model to use
-        step: A step from a plan
+        llm: 要使用的语言模型
+        step: 计划中的某个步骤
         
     Returns:
-        Atomic action as a dictionary, or None if generation failed
+        以字典形式表示的原子动作;若生成失败则返回 None
     """
     from shared.utils import extract_json_from_text
     
@@ -94,46 +94,46 @@ Response (JSON only):"""
     return None
 ```
 
-And in `agent/agent.py`:
+以及 `agent/agent.py` 中:
 
 ```python
 def create_atomic_action(self, step: str) -> dict | None:
     """
-    Convert a plan step into an atomic action.
+    把一个计划步骤转换成原子动作。
     
-    Lesson 09 version.
+    第 09 课版本。
     
     Args:
-        step: A step from a plan (e.g., "Write an explanation of AI agents")
+        step: 计划中的某个步骤(例如 "Write an explanation of AI agents")
         
     Returns:
-        Atomic action dictionary with "action" and "inputs", or None if generation failed
+        包含 "action" 和 "inputs" 的原子动作字典;若生成失败则返回 None
     """
     return create_atomic_action(self.llm, step)
 ```
 
-Notice:
-- **Step conversion** - Vague steps become specific actions with parameters
-- **Schema validation** - Actions must have "action" and "inputs" fields
-- **Structured output** - Uses the same JSON pattern from previous lessons
-- **Retry logic** - Multiple attempts to get valid atomic actions
+注意:
+- **步骤转换** —— 含糊的步骤变成带参数的具体动作
+- **schema 校验** —— 动作必须包含 "action" 和 "inputs" 字段
+- **结构化输出(structured output)** —— 沿用前几课相同的 JSON 模式
+- **重试逻辑** —— 多次尝试以获得有效的原子动作
 
-## How to Run
+## 如何运行
 
-Look at `complete_example.py`, see `lesson_09_atomic_actions()` method:
+查看 `complete_example.py` 中的 `lesson_09_atomic_actions()` 方法:
 
 ```python
 from agent.agent import Agent
 
 agent = Agent("models/llama-3-8b-instruct.gguf")
 
-# Convert a plan step into an atomic action
+# 把一个计划步骤转换成原子动作
 step = "Write an explanation of AI agents"
 atomic_action = agent.create_atomic_action(step)
 print(f"Step: {step}")
 print(f"Atomic action: {atomic_action}")
 
-# Example with a step from a plan
+# 以计划中的某个步骤为例
 plan = agent.create_plan("Create a tutorial about Python")
 if plan and "steps" in plan and plan["steps"]:
     first_step = plan["steps"][0]
@@ -142,70 +142,70 @@ if plan and "steps" in plan and plan["steps"]:
     print(f"Atomic action from plan step: {atomic_action_from_plan}")
 ```
 
-## Compare to Lesson 08
+## 与第 08 课的对比
 
-**Lesson 08 (Planning):**
+**第 08 课(规划):**
 ```
 Goal -> Plan: ["Research topic", "Create outline", "Write draft"]
 ```
-Plans are lists of vague step descriptions.
+计划是一个由含糊步骤描述组成的列表。
 
-**Lesson 09 (Atomic Actions):**
+**第 09 课(原子动作):**
 ```
 Step: "Write draft" -> Atomic: {"action": "generate_text", "inputs": {"topic": "...", "length": "..."}}
 ```
-Steps become specific, typed actions with validated parameters.
+步骤变成具体的、带类型且参数经过校验的动作。
 
-## Key Insights
+## 关键洞见
 
-### Small Steps = Safe Systems
+### 小步骤 = 安全系统
 
-The smaller the action, the safer the system. Atomic actions are:
-- Easier to validate - you can check parameters before execution
-- Easier to test - each action can be tested independently
-- Easier to debug - failures are isolated to specific actions
-- Harder to fail catastrophically - small actions have limited blast radius
+动作越小,系统越安全。原子动作具有以下特点:
+- 更容易校验——你可以在执行前检查参数
+- 更容易测试——每个动作都能独立测试
+- 更容易调试——失败被隔离在具体的某个动作上
+- 更难发生灾难性失败——小动作的「爆炸半径」有限
 
-### Vague vs Specific
+### 含糊 vs 具体
 
-"Write article" is vague. "generate_text(topic='AI agents', length='1000 words')" is specific. Specificity enables validation and predictable execution.
+「写一篇文章」是含糊的。「generate_text(topic='AI agents', length='1000 words')」是具体的。具体性使校验和可预测的执行成为可能。
 
-### Validation Happens Early
+### 校验要尽早发生
 
-By validating actions before execution, you catch errors early. A plan with invalid actions can be rejected before any work is done.
+通过在执行前校验动作,你能尽早捕获错误。一个含有无效动作的计划,可以在任何实际工作开始之前就被拒绝。
 
-### Building Blocks
+### 构建积木
 
-Atomic actions are building blocks. Complex workflows are built from many simple atomic actions, each validated and safe.
+原子动作是构建积木。复杂的工作流由许多简单的原子动作搭建而成,每一个都经过校验、都是安全的。
 
-## Common Issues
+## 常见问题
 
-**"Atomic action is still vague"**
-- Provide clearer instructions in the prompt
-- Give examples of good atomic actions
-- Consider constraining the action names to a predefined set
+**「原子动作还是太含糊」**
+- 在 prompt 中给出更清晰的指令
+- 提供优质原子动作的示例
+- 考虑把动作名称约束到一个预定义的集合中
 
-**"Validation fails"**
-- Check that the action has both "action" and "inputs" fields
-- Verify the JSON structure is correct
-- Consider adding schema validation for inputs
+**「校验失败」**
+- 检查动作是否同时包含 "action" 和 "inputs" 字段
+- 确认 JSON 结构正确
+- 考虑为 inputs 增加 schema 校验
 
-**"Conversion fails"**
-- Some steps might not map cleanly to atomic actions
-- Consider multiple retry attempts (already implemented)
-- Provide more context about what makes a good atomic action
+**「转换失败」**
+- 有些步骤可能无法干净地映射成原子动作
+- 考虑多次重试(已实现)
+- 提供更多关于「什么才算优质原子动作」的上下文
 
-## Exercises
+## 练习
 
-1. Convert different types of plan steps to atomic actions
-2. Compare atomic actions for similar steps
-3. Try to validate atomic actions before execution
-4. Experiment with different input parameter structures
+1. 把不同类型的计划步骤转换成原子动作
+2. 对比相似步骤所生成的原子动作
+3. 尝试在执行前校验原子动作
+4. 试验不同的输入参数结构
 
-## What's Next?
+## 接下来是什么?
 
-In [Lesson 10](10_atom_of_thought.md), we'll combine planning, atomic actions, and **dependencies** to create execution graphs that can run actions in the correct order and even in parallel.
+在[第 10 课](10_atom_of_thought.md)中,我们将把规划、原子动作和**依赖关系**结合起来,创建执行图,从而以正确的顺序、甚至并行地运行动作。
 
 ---
 
-**Key Takeaway:** Small steps = safe systems. Atomic actions make execution predictable, debuggable, and safe by breaking vague plans into specific, validated operations.
+**核心要点:** 小步骤 = 安全系统。原子动作通过把含糊的计划拆解成具体、经过校验的操作,让执行变得可预测、可调试且安全。

@@ -1,65 +1,65 @@
-# Lesson 06  -  The Agent Loop
+# 第 06 课 —— Agent 循环(Agent Loop)
 
-## What Question Are We Answering?
+## 我们要回答什么问题?
 
-**"How does this become an agent instead of a chatbot?"**
+**「它怎样才能从一个聊天机器人变成一个 Agent?」**
 
-Answer: When it can **observe, decide, act, and repeat**, with state. A chatbot responds once and stops. An agent takes multiple steps toward a goal.
+答案:当它能够**观察、决策、行动,并不断重复**,且带有状态(state)时。聊天机器人响应一次就停下,而 Agent 会朝着目标走出多个步骤。
 
-## What You Will Build
+## 你将构建什么
 
-An agent loop that:
-- Runs multiple steps in sequence
-- Maintains state across steps
-- Decides actions based on current state
-- Terminates when the goal is reached or max steps exceeded
+一个 agent loop,它能:
+- 按顺序运行多个步骤
+- 在各步骤之间维持状态
+- 基于当前状态决定动作
+- 在目标达成或超过最大步数时终止
 
-## New Concepts Introduced
+## 引入的新概念
 
-### 1. Agent Loop
+### 1. Agent 循环(Agent Loop)
 
-The **agent loop** is the repeating cycle: observe, decide, act. Each iteration, the agent looks at the current situation, decides what to do, takes that action, and repeats until done.
+**agent loop** 就是不断重复的循环:观察、决策、行动。每一轮迭代中,Agent 审视当前情境,决定该做什么,执行该动作,然后重复,直到完成。
 
-This is what separates agents from simple chatbots - agents don't stop after one response.
+这正是 Agent 区别于简单聊天机器人的地方——Agent 不会在一次响应后就停下。
 
-### 2. State Transitions
+### 2. 状态转移(State Transitions)
 
-**State transitions** track how the agent's state changes with each step. The state might include step count, completion status, accumulated results, or other tracking information.
+**状态转移**记录 Agent 的状态如何随每一步变化。状态可能包含步数、完成情况、累积的结果,或其他跟踪信息。
 
-State makes the loop aware of its progress and history.
+状态让循环能够感知自己的进展和历史。
 
-### 3. Termination Conditions
+### 3. 终止条件(Termination Conditions)
 
-**Termination conditions** determine when the loop stops. Common conditions include:
-- The agent decides it's "done"
-- Maximum steps reached
-- A goal is achieved
-- An error occurs
+**终止条件**决定循环何时停止。常见的条件包括:
+- Agent 判定自己「完成了」
+- 达到最大步数
+- 目标已达成
+- 发生错误
 
-Without termination, the loop would run forever.
+没有终止条件,循环就会永远跑下去。
 
-## What We Are NOT Doing (Yet)
+## 我们暂时还不做的事
 
-- No memory across loops ([Lesson 07](07_memory.md))
-- No planning ([Lesson 08](08_planning.md))
-- No sophisticated reasoning - just simple step-by-step decisions
+- 还没有跨循环的记忆([第 07 课](07_memory.md))
+- 还没有规划([第 08 课](08_planning.md))
+- 还没有复杂的推理——只是简单的逐步决策
 
-## The Code
+## 代码
 
-Look at `agent/agent.py`, see `agent_step()` and `run_loop()` methods:
+看 `agent/agent.py` 里的 `agent_step()` 和 `run_loop()` 方法:
 
 ```python
 def agent_step(self, user_input: str) -> dict | None:
     """
-    Execute one step of the agent loop: observe, decide, act.
-    
-    Lesson 06 version.
-    
+    执行 agent loop 的一步:观察、决策、行动。
+
+    第 06 课版本。
+
     Args:
-        user_input: User's input or system observation
-        
+        user_input: 用户输入或系统观察
+
     Returns:
-        Action decision or None if step failed
+        动作决策,如果这一步失败则返回 None
     """
     state_dict = self.state.to_dict()
     
@@ -97,14 +97,14 @@ Response (JSON only):"""
 
 def run_loop(self, user_input: str, max_steps: int = 5):
     """
-    Run the agent loop for multiple steps.
-    
+    运行 agent loop 若干步。
+
     Args:
-        user_input: Initial user input
-        max_steps: Maximum number of steps to execute
-        
+        user_input: 初始用户输入
+        max_steps: 最多执行的步数
+
     Returns:
-        List of action results
+        动作结果的列表
     """
     self.state.reset()
     results = []
@@ -115,7 +115,7 @@ def run_loop(self, user_input: str, max_steps: int = 5):
         if action:
             results.append(action)
             
-            # Simple termination condition
+            # 简单的终止条件
             if action.get("action") == "done":
                 self.state.mark_done()
         else:
@@ -124,15 +124,15 @@ def run_loop(self, user_input: str, max_steps: int = 5):
     return results
 ```
 
-Notice:
-- **State tracking** - Each step increments the step counter and checks completion
-- **Loop structure** - `while not done` continues until termination
-- **Action accumulation** - Results are collected across steps
-- **Safety limits** - `max_steps` prevents infinite loops
+注意:
+- **状态跟踪**——每一步都会递增步数计数器并检查是否完成
+- **循环结构**——`while not done` 会一直持续到终止
+- **动作累积**——结果会跨步骤被收集起来
+- **安全限制**——`max_steps` 防止无限循环
 
-## How to Run
+## 如何运行
 
-Look at `complete_example.py`, see `lesson_06_agent_loop()` method:
+看 `complete_example.py` 里的 `lesson_06_agent_loop()` 方法:
 
 ```python
 from agent.agent import Agent
@@ -155,72 +155,72 @@ for i, result in enumerate(results, 1):
         print()
 ```
 
-The output shows each iteration with the action taken and reason. Note that repetition in early iterations is expected - the agent refines its understanding step by step.
+输出会展示每一轮迭代所采取的动作及其理由。注意:前几轮出现重复是正常的——Agent 是在一步步打磨自己的理解。
 
-## Compare to Lesson 05
+## 与第 05 课的对比
 
-**Lesson 05 (Tool Calling):**
+**第 05 课(工具调用):**
 ```
 Request -> Tool call -> Result -> Done
 ```
-Single interaction: request, execute, return.
+单次交互:请求、执行、返回。
 
-**Lesson 06 (Agent Loop):**
+**第 06 课(Agent 循环):**
 ```
 Input -> Step 1 -> Step 2 -> Step 3 -> Done
           |        |        |
         Action   Action   Action
 ```
-Multiple steps in sequence, each deciding what to do next.
+多个步骤依次进行,每一步都决定接下来做什么。
 
-![Agent Loop Flow](diagrams/lesson-06-agent-loop.png)
+![Agent 循环流程](diagrams/lesson-06-agent-loop.png)
 
-## Key Insights
+## 关键洞见
 
-### An Agent is Not a Clever Prompt
+### Agent 不是一个聪明的 prompt
 
-An agent is not a clever prompt. It's a **loop with state**. The magic isn't in the prompt - it's in the repeated cycle of observation, decision, and action.
+Agent 不是一个聪明的 prompt,它是一个**带状态的循环**。神奇之处不在 prompt 里——而在于观察、决策、行动这一不断重复的循环。
 
-### State Enables Continuity
+### 状态带来连续性
 
-Without state, each step would be independent. With state, steps can build on each other and track progress toward a goal.
+没有状态,每一步都是相互独立的。有了状态,各步骤就能彼此叠加,并跟踪朝目标推进的进展。
 
-### Termination is Critical
+### 终止至关重要
 
-Always have termination conditions. Without them, loops can run forever or consume resources unnecessarily. `max_steps` is a simple but essential safety mechanism.
+永远要设置终止条件。没有它们,循环可能永远运行,或不必要地消耗资源。`max_steps` 是个简单但必不可少的安全机制。
 
-### Simple is Better
+### 越简单越好
 
-This loop is intentionally simple. Complex reasoning can come later - first, establish the pattern of repeated action.
+这个循环刻意保持简单。复杂的推理可以放到后面——首先要把「不断重复地行动」这个模式建立起来。
 
-## Common Issues
+## 常见问题
 
-**"The loop runs forever"**
-- Check that termination conditions are properly set
-- Verify `max_steps` is being enforced
-- Make sure the agent can signal "done"
+**「循环永远停不下来」**
+- 检查终止条件是否正确设置
+- 确认 `max_steps` 确实被强制执行
+- 确保 Agent 能够发出「完成」信号
 
-**"Each step seems independent"**
-- Include state information in the prompt
-- Pass accumulated results to subsequent steps
-- Make the state visible to the decision-making process
+**「每一步看起来都是独立的」**
+- 在 prompt 里包含状态信息
+- 把累积的结果传给后续步骤
+- 让决策过程能看到状态
 
-**"The agent doesn't make progress"**
-- Check that actions actually change something
-- Verify state is being updated correctly
-- Ensure the agent sees relevant state information
+**「Agent 没有进展」**
+- 检查动作是否真的改变了什么
+- 确认状态被正确更新
+- 确保 Agent 能看到相关的状态信息
 
-## Exercises
+## 练习
 
-1. Modify the available actions and see how the loop adapts
-2. Change `max_steps` and observe how it affects behavior
-3. Add state variables beyond step count
-4. Experiment with different termination conditions
+1. 修改可用的动作,看看循环如何适应
+2. 改变 `max_steps`,观察它如何影响行为
+3. 添加步数之外的其他状态变量
+4. 尝试不同的终止条件
 
-## What's Next?
+## 下一步是什么?
 
-In [Lesson 07](07_memory.md), we'll add **memory** so the agent can remember information across multiple interactions, not just within a single loop.
+在[第 07 课](07_memory.md)中,我们将加入**记忆**,让 Agent 能够跨多次交互记住信息,而不仅仅是在单次循环内。
 
 ---
 
-**Key Takeaway:** Agent = loop + state. That's it. The loop enables multi-step behavior, state enables continuity.
+**核心要点:** Agent = 循环 + 状态。就这么简单。循环带来多步行为,状态带来连续性。

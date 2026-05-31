@@ -1,63 +1,63 @@
-# Lesson 01  -  Talking to a Model
+# 第 01 课 —— 与模型对话
 
-## What Question Are We Answering?
+## 我们要回答什么问题?
 
-**"How do I talk to a language model at all?"**
+**「我到底该怎么和语言模型对话?」**
 
-This is the absolute foundation. Before we can build agents, we need to understand the simplest possible interaction: text in, text out.
+这是最根本的基础。在构建 Agent 之前,我们需要理解最简单的一种交互:输入文本,输出文本。
 
-## What You Will Build
+## 你将构建什么
 
-A minimal interaction that:
-- Loads a local LLM
-- Sends text to it
-- Receives text back
+一个极简的交互,它会:
+- 加载一个本地 LLM
+- 向它发送文本
+- 接收返回的文本
 
-That's it. No magic. No frameworks. Just the basics.
+仅此而已。没有魔法,没有框架,只有最基本的东西。
 
-## New Concepts Introduced
+## 引入的新概念
 
-### 1. Prompts
+### 1. Prompt(提示词)
 
-A **prompt** is just text you send to the model. It can be a question like "What is an AI agent?", an instruction like "Explain quantum computing", or a request like "Write a poem about the ocean". The model completes or responds to this text based on patterns it learned during training.
+**prompt** 就是你发送给模型的文本。它可以是一个问题,比如「什么是 AI Agent?」;一条指令,比如「解释一下量子计算」;或者一个请求,比如「写一首关于海洋的诗」。模型会根据它在训练阶段学到的模式,对这段文本进行补全或回应。
 
-### 2. Tokens
+### 2. Token
 
-Models don't see text as words - they see **tokens**. Tokens are pieces of text (often words or subwords). For example, "Hello world" might be 2 tokens, while "artificial intelligence" could be 2-4 tokens depending on the model.
+模型看到的不是一个个单词,而是一个个 **token**。token 是文本的片段(通常是单词或子词)。例如,「Hello world」可能是 2 个 token,而「artificial intelligence」根据模型不同,可能是 2 到 4 个 token。
 
-This matters because models have token limits (context windows), generation is measured in tokens per second, and longer prompts use more tokens, leaving less room for responses.
+这一点很重要,因为模型有 token 上限(上下文窗口),生成速度以「每秒 token 数」来衡量,而且更长的 prompt 会消耗更多 token,留给回复的空间也就更少。
 
-### 3. Context
+### 3. 上下文(Context)
 
-The **context** is everything the model can "see" at once. It includes your prompt, any previous conversation, and system instructions. Models have a **context window** (e.g., 2048 tokens). If you exceed it, the model can't see the earlier text.
+**上下文**是模型一次能「看到」的全部内容。它包括你的 prompt、之前的任何对话,以及系统指令。模型有一个**上下文窗口**(例如 2048 个 token)。如果超出这个范围,模型就看不到更早的文本了。
 
-## What We Are NOT Doing (Yet)
+## 我们(暂时)不做什么
 
-- No system prompts ([Lesson 02](02_system_prompt.md))
-- No structured outputs ([Lesson 03](03_structured_output.md))
-- No tools ([Lesson 05](05_tools.md))
-- No agents ([Lesson 06](06_agent_loop.md))
-- No memory ([Lesson 07](07_memory.md))
+- 不用系统提示词([第 02 课](02_system_prompt.md))
+- 不用结构化输出([第 03 课](03_structured_output.md))
+- 不用工具([第 05 课](05_tools.md))
+- 不构建 Agent([第 06 课](06_agent_loop.md))
+- 不用记忆([第 07 课](07_memory.md))
 
-This lesson is intentionally minimal.
+这一课刻意保持极简。
 
-## The Code
+## 代码
 
-Look at `agent/agent.py`, see `simple_generate()` method:
+看 `agent/agent.py` 中的 `simple_generate()` 方法:
 
 ```python
 def simple_generate(self, user_input: str) -> str:
     """
-    Simplest possible interaction - just pass text to the LLM.
+    最简单的交互方式 —— 只是把文本传给 LLM。
     """
     return self.llm.generate(user_input)
 ```
 
-That's it. One line. No complexity.
+就这样。一行代码。毫无复杂之处。
 
-## How to Run
+## 如何运行
 
-Look at `complete_example.py`, see `lesson_01_basic_chat()` method:
+看 `complete_example.py` 中的 `lesson_01_basic_chat()` 方法:
 
 ```python
 from agent.agent import Agent
@@ -68,52 +68,52 @@ response = agent.simple_generate("What is an AI agent?")
 print(response)
 ```
 
-## What's Happening Internally?
+## 内部到底发生了什么?
 
-1. Your text is converted to tokens
-2. Tokens are sent to the model
-3. The model predicts the next token
-4. Repeat until a stop condition (end token, max length, etc.)
-5. Tokens are converted back to text
-6. Text is returned to you
+1. 你的文本被转换成 token
+2. token 被发送给模型
+3. 模型预测下一个 token
+4. 重复这个过程,直到满足某个停止条件(结束 token、最大长度等)
+5. token 被转换回文本
+6. 文本返回给你
 
-## Key Insights
+## 关键洞见
 
-### There is No "Understanding"
+### 并不存在「理解」
 
-The model doesn't "understand" your question. Instead, it recognizes patterns in the tokens, predicts likely continuations, and generates probabilistic text. This is important: **models are pattern matchers, not minds.**
+模型并不「理解」你的问题。相反,它识别 token 中的模式,预测可能的后续内容,并生成概率性的文本。这一点很重要:**模型是模式匹配器,不是头脑。**
 
-### It's Probabilistic
+### 它是概率性的
 
-Run the same prompt twice and you might get different responses. This happens because models use randomness (temperature) in generation, and multiple plausible continuations exist. There's no single "correct" answer - just probabilistic outputs.
+同一个 prompt 跑两次,你可能得到不同的回复。这是因为模型在生成时引入了随机性(temperature),而且对同一段文本存在多种合理的后续。并不存在唯一「正确」的答案——只有概率性的输出。
 
-### Text In = Text Out
+### 输入文本 = 输出文本
 
-That's all this is. Everything else we build (agents, tools, memory) is built on top of this simple foundation.
+它的本质就是如此。我们之后构建的一切(Agent、工具、记忆)都建立在这个简单的基础之上。
 
-## Common Issues
+## 常见问题
 
-**"The response is cut off"**
-- Increase `max_tokens` in `shared/llm.py`
+**「回复被截断了」**
+- 在 `shared/llm.py` 中调大 `max_tokens`
 
-**"The model repeats itself"**
-- This is normal for completion models
-- We'll fix it with better prompting in [Lesson 02](02_system_prompt.md)
+**「模型在重复自己」**
+- 对于补全类模型,这很正常
+- 我们会在[第 02 课](02_system_prompt.md)用更好的 prompt 来解决它
 
-**"The response doesn't match the prompt"**
-- Some models need specific formatting
-- We'll add structure in [Lesson 02](02_system_prompt.md) and [Lesson 03](03_structured_output.md)
+**「回复和 prompt 对不上」**
+- 有些模型需要特定的格式
+- 我们会在[第 02 课](02_system_prompt.md)和[第 03 课](03_structured_output.md)中加入结构
 
-## Exercises
+## 练习
 
-1. Try different prompts and observe the responses
-2. Change the `temperature` in `shared/llm.py` (0.0 = deterministic, 1.0 = creative)
-3. Use `max_tokens` to control response length
+1. 尝试不同的 prompt,观察回复有何不同
+2. 修改 `shared/llm.py` 中的 `temperature`(0.0 = 确定性,1.0 = 有创造性)
+3. 用 `max_tokens` 来控制回复长度
 
-## What's Next?
+## 接下来是什么?
 
-In [Lesson 02](02_system_prompt.md), we'll add a **system prompt** to shape the model's behavior. This turns random completions into consistent, useful responses.
+在[第 02 课](02_system_prompt.md)中,我们会加入**系统提示词(system prompt)**来塑造模型的行为。这能把随机的补全变成稳定、有用的回复。
 
 ---
 
-**Key Takeaway:** An LLM is just a text completion engine. Everything we build is structured interaction with this simple mechanism.
+**核心要点:** LLM 只是一个文本补全引擎。我们构建的一切,都是围绕这个简单机制展开的结构化交互。

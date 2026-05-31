@@ -1,56 +1,56 @@
-# Philosophy
+# 理念
 
-## Why This Repository Exists
+## 本仓库存在的意义
 
-Most tutorials teach how to **use** agents. This repository teaches how agents **work**.
+大多数教程教你如何**使用**Agent。本仓库教你 Agent 究竟是如何**工作**的。
 
-The goal is not to build the fastest demo or the most impressive chatbot. The goal is **mechanical understanding**  -  the kind that lets you debug, extend, and reason about agent systems confidently.
+目标不是做出最快的 demo,也不是最惊艳的聊天机器人。目标是**机制层面的理解**——那种能让你自信地调试、扩展并推理 Agent 系统的理解。
 
-## What We Avoid
+## 我们刻意回避什么
 
-### 1. Framework Abstractions
+### 1. 框架抽象
 
-Frameworks like LangChain, CrewAI, and AutoGen are powerful tools, but they hide the mechanisms that make agents work. By the time you understand what they abstract, you no longer need them.
+LangChain、CrewAI、AutoGen 这类框架是强大的工具,但它们把让 Agent 得以运转的机制都藏了起来。等你真正搞懂它们抽象了什么,你也就不再需要它们了。
 
-This repository builds agents from first principles so you can:
-- Understand what frameworks actually do
-- Make informed decisions about when to use them
-- Debug problems when they arise
-- Build custom solutions when needed
+本仓库从第一性原理出发构建 Agent,这样你就能:
+- 理解框架实际上在做什么
+- 在「何时该用框架」上做出明智判断
+- 在问题出现时进行调试
+- 在需要时构建自定义方案
 
-### 2. Anthropomorphic Language
+### 2. 拟人化的语言
 
-Agents don't "think," "reason," or "understand." They:
-- Process text
-- Follow patterns
-- Make structured decisions
-- Execute predefined operations
+Agent 不会「思考」、不会「推理」、也不会「理解」。它们做的是:
+- 处理文本
+- 遵循模式
+- 做出结构化的决策
+- 执行预先定义好的操作
 
-Using precise language prevents magical thinking and keeps the focus on systems, not personalities.
+使用精确的语言能避免魔法般的臆想,让注意力始终落在系统上,而不是人格上。
 
-### 3. Hidden Reasoning
+### 3. 隐藏的推理
 
-Many agent frameworks hide the decision-making process in opaque "chain-of-thought" or "reasoning" steps. This creates an illusion of intelligence and makes debugging nearly impossible.
+许多 Agent 框架把决策过程藏在不透明的「思维链(chain-of-thought)」或「推理」步骤里。这制造了一种智能的假象,也让调试几乎变得不可能。
 
-In this repository:
-- Every decision is explicit
-- Every state transition is visible
-- Every prompt is readable
-- Nothing happens behind the scenes
+在本仓库里:
+- 每一个决策都是显式的
+- 每一次状态转移都是可见的
+- 每一个 prompt 都是可读的
+- 没有任何事情在幕后悄悄发生
 
-### 4. Premature Autonomy
+### 4. 过早的自主性
 
-Autonomous agents sound exciting but are dangerous without understanding. This repository builds agency gradually:
-- First: Model responds
-- Then: Model decides
-- Then: Model requests actions
-- Finally: System executes safely
+自主 Agent 听起来令人兴奋,但在缺乏理解的情况下却很危险。本仓库循序渐进地构建能动性:
+- 首先:模型作出响应
+- 然后:模型作出决策
+- 接着:模型请求执行动作
+- 最后:系统安全地执行
 
-Autonomy is the **last** thing added, not the first.
+自主性是**最后**才加进来的东西,而不是最先。
 
-## What We Focus On
+## 我们重点关注什么
 
-### 1. Explicit State
+### 1. 显式的状态(Explicit State)
 
 ```python
 class AgentState:
@@ -59,9 +59,9 @@ class AgentState:
         self.done = False
 ```
 
-State isn't hidden in conversation history or mysterious context. It's a Python object you can inspect, modify, and reason about.
+状态不藏在对话历史或神秘的上下文里。它是一个 Python 对象,你可以检视它、修改它、对它进行推理。
 
-### 2. Structured Outputs
+### 2. 结构化输出
 
 ```python
 schema = {
@@ -70,9 +70,9 @@ schema = {
 }
 ```
 
-Free-text outputs are probabilistic and unreliable. Structured outputs are contracts that can be validated, retried, and trusted.
+自由文本输出是概率性的、不可靠的。结构化输出则是一份契约——可以被校验、可以重试、值得信任。
 
-### 3. Validated Decisions
+### 3. 经过校验的决策
 
 ```python
 for attempt in range(3):
@@ -82,9 +82,9 @@ for attempt in range(3):
         break
 ```
 
-LLMs are probabilistic. Validation + retries turn them into reliable components.
+LLM 是概率性的。校验 + 重试能把它们变成可靠的组件。
 
-### 4. Data-Driven Planning
+### 4. 数据驱动的规划
 
 ```python
 plan = {
@@ -96,13 +96,13 @@ plan = {
 }
 ```
 
-Plans aren't thoughts  -  they're data structures. This makes them inspectable, modifiable, and safe.
+规划不是思考——它们是数据结构。这让它们可被检视、可被修改、且安全。
 
-## Core Beliefs
+## 核心信念
 
-### Agents Are Systems
+### Agent 就是系统
 
-An agent is:
+一个 Agent 是:
 ```python
 while not done:
     observation = perceive(environment)
@@ -110,95 +110,95 @@ while not done:
     state = act(decision, state)
 ```
 
-Not a personality. Not consciousness. A loop.
+不是人格。不是意识。是一个循环。
 
-### Structure Beats Cleverness
+### 结构胜过小聪明
 
-A mediocre prompt with good structure beats a clever prompt with free-form output every time.
+一个结构良好的平庸 prompt,每一次都胜过一个采用自由格式输出的巧妙 prompt。
 
-### Constraints Enable Reliability
+### 约束带来可靠性
 
-The more constrained your agent's action space, the more reliably it behaves. This feels limiting at first but is liberating in practice.
+你的 Agent 动作空间约束得越紧,它的行为就越可靠。这一开始让人觉得束手束脚,但在实践中却是一种解放。
 
-### Simplicity Scales
+### 简单可以规模化
 
-Complex agents emerge from simple patterns repeated consistently, not from complex patterns used once.
+复杂的 Agent 来自简单模式的持续重复,而不是来自只用一次的复杂模式。
 
-## What This Means in Practice
+## 这在实践中意味着什么
 
-### Before: Mystery
+### 之前:谜团
 ```python
-agent.run("Analyze this document and suggest improvements")
-# What happens? Who knows.
+agent.run("分析这份文档并给出改进建议")
+# 发生了什么?谁知道呢。
 ```
 
-### After: Clarity
+### 之后:清晰
 ```python
-agent.run("Analyze this document and suggest improvements")
-# 1. Parse request
-# 2. Decide: analysis required
-# 3. Call tool: document_analyzer
-# 4. Format results
-# 5. Return structured suggestions
+agent.run("分析这份文档并给出改进建议")
+# 1. 解析请求
+# 2. 决策:需要进行分析
+# 3. 调用工具:document_analyzer
+# 4. 格式化结果
+# 5. 返回结构化的建议
 ```
 
-Every step is visible. Every decision is explicit. Every failure is debuggable.
+每一步都可见。每一个决策都是显式的。每一次失败都可调试。
 
-## Why No ReAct?
+## 为什么不用 ReAct?
 
-ReAct (Reasoning + Acting) was an important research contribution, but:
-1. Modern frameworks don't use it
-2. It adds cognitive overhead for beginners
-3. Tool calling + good prompts accomplish the same goals
-4. It conflates "reasoning" (opaque) with "planning" (data)
+ReAct(Reasoning + Acting,推理 + 行动)是一项重要的研究贡献,但是:
+1. 现代框架并不使用它
+2. 它给初学者增加了认知负担
+3. 工具调用(tool calling)+ 优质 prompt 就能达成同样的目标
+4. 它把「推理」(不透明)和「规划」(数据)混为一谈
 
-This repository replaces ReAct with simpler, more explicit patterns that are easier to understand and debug.
+本仓库用更简单、更显式的模式取代了 ReAct,这些模式更容易理解、也更容易调试。
 
-## Why Local Models?
+## 为什么用本地模型?
 
-1. **No API costs** - Experiment freely
-2. **No rate limits** - Iterate quickly  
-3. **Full control** - See exactly what happens
-4. **Privacy** - Your data stays local
-5. **Learning** - Understand the full stack
+1. **没有 API 成本** —— 可以自由实验
+2. **没有速率限制** —— 可以快速迭代  
+3. **完全可控** —— 能看清究竟发生了什么
+4. **隐私** —— 你的数据留在本地
+5. **学习** —— 理解整个技术栈
 
-Cloud APIs are great for production. Local models are better for learning.
+云端 API 适合用于生产。本地模型则更适合用于学习。
 
-## The Learning Philosophy
+## 学习理念
 
-This repository follows a specific pedagogical approach:
+本仓库遵循一套特定的教学方法:
 
-### Progressive Complexity
-Each lesson adds **exactly one** new concept. No shortcuts. No "trust me, this works."
+### 渐进式复杂度
+每节课**恰好**引入一个新概念。没有捷径。没有「相信我,这管用」。
 
-### Readable Code
-Code is written to be read top-to-bottom, not to be clever. If you need comments to understand it, it's too complex.
+### 可读的代码
+代码被写成可以从上到下顺读的样子,而不是为了炫技。如果你需要靠注释才能读懂它,那它就太复杂了。
 
-### Explicit Over Implicit
-Magic is the enemy of understanding. If something feels magical, open the file  -  there's always a mechanical explanation.
+### 显式优于隐式
+魔法是理解的敌人。如果某个东西让你觉得像魔法,那就打开文件看看——背后总有一个机制层面的解释。
 
-### Iterative Refinement
-The same agent file grows across lessons. This mirrors real development and prevents "tutorial reset fatigue."
+### 迭代式精炼
+同一个 Agent 文件随课程不断成长。这既贴合真实的开发过程,也避免了「教程每章推倒重来」的疲劳感。
 
-## When to Use Frameworks
+## 何时该用框架
 
-After completing this repository, you'll understand:
-- What frameworks abstract
-- When that abstraction helps
-- When it hurts
-- How to debug them
+完成本仓库之后,你将理解:
+- 框架抽象了什么
+- 这种抽象在什么时候有帮助
+- 它在什么时候帮倒忙
+- 如何调试它们
 
-Then frameworks become tools, not magic boxes.
+到那时,框架就成了工具,而不是魔法盒子。
 
-## The Goal
+## 目标
 
-By the end of this repository, you should be able to:
-1. Build a simple agent from scratch in an afternoon
-2. Explain how every part works
-3. Debug agent failures systematically
-4. Evaluate whether to use a framework
-5. Read framework code and understand it
+读完本仓库时,你应当能够:
+1. 在一个下午内从零构建一个简单的 Agent
+2. 解释清楚每一部分是如何工作的
+3. 系统化地调试 Agent 的故障
+4. 评估是否值得使用某个框架
+5. 读懂框架代码并理解它
 
-That's the goal: **confident, mechanical understanding**.
+这就是目标:**自信的、机制层面的理解**。
 
-Not hype. Not magic. Just systems.
+不是炒作。不是魔法。只是系统。
