@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Complete Agent Example
+完整的 Agent 示例
 
-This script demonstrates the agent using features from all 12 lessons.
-It's meant as a reference for how the pieces fit together.
+本脚本演示了使用全部 12 节课功能的 agent。
+它旨在作为各部分如何组合在一起的参考。
 """
 
 import time
@@ -11,7 +11,7 @@ from agent.agent import Agent
 
 
 def lesson_01_basic_chat():
-    """Lesson 01: Basic LLM interaction"""
+    """第 01 课:基础 LLM 交互"""
     print("\n" + "="*50)
     print("LESSON 01: Basic LLM Chat")
     print("="*50)
@@ -22,7 +22,7 @@ def lesson_01_basic_chat():
 
 
 def lesson_02_with_role():
-    """Lesson 02: System prompts"""
+    """第 02 课:System prompt"""
     print("\n" + "="*50)
     print("LESSON 02: With System Prompt")
     print("="*50)
@@ -33,7 +33,7 @@ def lesson_02_with_role():
 
 
 def lesson_03_structured():
-    """Lesson 03: Structured outputs"""
+    """第 03 课:结构化输出"""
     print("\n" + "="*50)
     print("LESSON 03: Structured Output")
     print("="*50)
@@ -53,7 +53,7 @@ def lesson_03_structured():
 
 
 def lesson_04_decisions():
-    """Lesson 04: Decision-making"""
+    """第 04 课:决策"""
     print("\n" + "="*50)
     print("LESSON 04: Decision Making")
     print("="*50)
@@ -68,7 +68,7 @@ def lesson_04_decisions():
 
 
 def lesson_05_tools():
-    """Lesson 05: Tool calling"""
+    """第 05 课:tool calling"""
     print("\n" + "="*50)
     print("LESSON 05: Tool Calling")
     print("="*50)
@@ -84,7 +84,7 @@ def lesson_05_tools():
 
 
 def lesson_06_agent_loop():
-    """Lesson 06: Agent loop"""
+    """第 06 课:Agent 循环"""
     print("\n" + "="*50)
     print("LESSON 06: Agent Loop")
     print("="*50)
@@ -108,14 +108,14 @@ def lesson_06_agent_loop():
 
 
 def lesson_07_memory():
-    """Lesson 07: Memory"""
+    """第 07 课:记忆"""
     print("\n" + "="*50)
     print("LESSON 07: Memory")
     print("="*50)
 
     agent = Agent("models/llama-3-8b-instruct.gguf")
 
-    # First interaction - store name
+    # 第一次交互——存储名字
     response1 = agent.run_with_memory("My name is Alice")
     if response1 and "reply" in response1:
         print(f"Response 1: {response1['reply']}")
@@ -124,7 +124,7 @@ def lesson_07_memory():
     else:
         print(f"Response 1: {response1}")
 
-    # Second interaction - recall name
+    # 第二次交互——回忆名字
     response2 = agent.run_with_memory("What's my name?")
     if response2 and "reply" in response2:
         print(f"Response 2: {response2['reply']}")
@@ -137,7 +137,7 @@ def lesson_07_memory():
 
 
 def lesson_08_planning():
-    """Lesson 08: Planning"""
+    """第 08 课:规划"""
     print("\n" + "="*50)
     print("LESSON 08: Planning")
     print("="*50)
@@ -153,20 +153,20 @@ def lesson_08_planning():
 
 
 def lesson_09_atomic_actions():
-    """Lesson 09: Atomic actions"""
+    """第 09 课:原子动作"""
     print("\n" + "="*50)
     print("LESSON 09: Atomic Actions")
     print("="*50)
 
     agent = Agent("models/llama-3-8b-instruct.gguf")
 
-    # Convert a plan step into an atomic action
+    # 将一个计划步骤转换为原子动作
     step = "Write an explanation of AI agents"
     atomic_action = agent.create_atomic_action(step)
     print(f"Step: {step}")
     print(f"Atomic action: {atomic_action}")
 
-    # Example with a step from a plan
+    # 以计划中的某个步骤为例
     plan = agent.create_plan("Create a tutorial about Python")
     if plan and "steps" in plan and plan["steps"]:
         first_step = plan["steps"][0]
@@ -176,7 +176,7 @@ def lesson_09_atomic_actions():
 
 
 def lesson_10_aot():
-    """Lesson 10: Atom of Thought"""
+    """第 10 课:Atom of Thought(思维原子)"""
     print("\n" + "="*50)
     print("LESSON 10: Atom of Thought")
     print("="*50)
@@ -192,7 +192,7 @@ def lesson_10_aot():
 
 
 def lesson_11_evals():
-    """Lesson 11: Evals (Regression Testing)"""
+    """第 11 课:Evals(回归测试)"""
     print("\n" + "="*50)
     print("LESSON 11: Evals")
     print("="*50)
@@ -211,8 +211,8 @@ def lesson_11_evals():
     print("\nRunning eval suites...")
     print("(This may take a minute as it runs multiple agent calls)\n")
     
-    # Run a subset for demo (full suite can be slow)
-    # Using first 2 cases from each suite for quick demo
+    # 为演示只跑一个子集(完整套件可能很慢)
+    # 为了快速演示,从每个套件取前 2 个用例
     results = evaluator.run_all(
         structured_cases=STRUCTURED_OUTPUT_GOLDEN[:2],
         tool_cases=TOOL_CALL_GOLDEN[:2],
@@ -220,17 +220,17 @@ def lesson_11_evals():
         memory_cases=MEMORY_GOLDEN[:1]
     )
     
-    # Print the report
+    # 打印报告
     print_eval_report(results)
-    
-    # Show how to access individual results
+
+    # 展示如何访问单个结果
     print("\nAccessing individual suite results:")
     for suite in results:
         print(f"  {suite.name}: {suite.pass_rate:.0%} pass rate")
 
 
 def lesson_12_telemetry():
-    """Lesson 12: Telemetry (Runtime Observability)"""
+    """第 12 课:Telemetry(运行时可观测性)"""
     print("\n" + "="*50)
     print("LESSON 12: Telemetry")
     print("="*50)
@@ -240,16 +240,16 @@ def lesson_12_telemetry():
     agent = Agent("models/llama-3-8b-instruct.gguf")
     telemetry = Telemetry(log_file="agent_telemetry.jsonl")
     
-    # Clear previous telemetry for clean demo
+    # 清除之前的 telemetry,保证演示干净
     telemetry.clear()
     
     print("\nRunning agent operations with telemetry...")
     
-    # Start a trace for this interaction
+    # 为本次交互启动一个 trace
     trace_id = telemetry.start_trace()
     print(f"Trace ID: {trace_id}")
     
-    # Operation 1: Structured output
+    # 操作 1:结构化输出
     print("\n1. Structured output call...")
     start = time.time()
     result1 = agent.generate_structured(
@@ -268,7 +268,7 @@ def lesson_12_telemetry():
     print(f"   Result: {result1}")
     print(f"   Duration: {duration1:.0f}ms")
     
-    # Operation 2: Tool call
+    # 操作 2:tool 调用
     print("\n2. Tool call...")
     start = time.time()
     tool_call = agent.request_tool("What is 15 * 8?")
@@ -286,11 +286,11 @@ def lesson_12_telemetry():
             tool_name=tool_call.get("tool", "unknown"),
             arguments=tool_call.get("arguments", {}),
             result=agent.execute_tool_call(tool_call) if tool_call else None,
-            duration_ms=1.0  # Tool execution is fast
+            duration_ms=1.0  # tool 执行很快
         )
         print(f"   Tool: {tool_call}")
     
-    # Operation 3: Memory
+    # 操作 3:记忆
     print("\n3. Memory operation...")
     start = time.time()
     result3 = agent.run_with_memory("My favorite color is blue")
@@ -305,10 +305,10 @@ def lesson_12_telemetry():
     telemetry.log_memory_operation("add", "favorite color is blue")
     print(f"   Result: {result3}")
     
-    # Print telemetry summary
+    # 打印 telemetry 摘要
     telemetry.print_summary()
-    
-    # Show recent spans
+
+    # 展示最近的 span
     print("\nRecent spans:")
     for span in telemetry.get_recent_spans(5):
         event = span.get("event_type", "unknown")
@@ -320,13 +320,13 @@ def lesson_12_telemetry():
 
 
 def main():
-    """Run all lesson examples"""
+    """运行所有课程示例"""
     print("\n" + "#"*50)
     print("# AI Agent Examples - All Lessons")
     print("#"*50)
     
     try:
-        # Comment out lessons you want to skip
+        # 注释掉你想跳过的课程
         lesson_01_basic_chat()
         lesson_02_with_role()
         lesson_03_structured()

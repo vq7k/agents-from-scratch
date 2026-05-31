@@ -1,5 +1,5 @@
 """
-Evals package - Golden datasets and test utilities.
+Evals 包 —— Golden 数据集与测试工具函数。
 """
 
 from evals.golden_datasets import (

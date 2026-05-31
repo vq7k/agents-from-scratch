@@ -1,8 +1,8 @@
 """
-Tool definitions for the agent.
+Agent 的 tool 定义。
 
-Tools are APIs, not abilities.
-The agent requests tools; the system executes them.
+Tool 是 API,而不是能力。
+Agent 请求 tool;由系统来执行它们。
 """
 
 from typing import Any
@@ -10,15 +10,15 @@ from typing import Any
 
 def calculator(a: float, b: float, operation: str = "add") -> float:
     """
-    Simple calculator tool.
-    
+    简单的计算器 tool。
+
     Args:
-        a: First number
-        b: Second number
-        operation: One of "add", "subtract", "multiply", "divide"
-        
+        a: 第一个数
+        b: 第二个数
+        operation: "add"、"subtract"、"multiply"、"divide" 之一
+
     Returns:
-        Result of the operation
+        运算结果
     """
     operations = {
         "add": lambda x, y: x + y,
@@ -35,12 +35,12 @@ def calculator(a: float, b: float, operation: str = "add") -> float:
 
 def get_tool_schema() -> dict:
     """
-    Get the schema for available tools.
-    
-    This is what the agent sees when deciding which tool to call.
-    
+    获取可用 tool 的 schema。
+
+    这是 agent 在决定调用哪个 tool 时所看到的内容。
+
     Returns:
-        Dictionary of tool names to their schemas
+        tool 名称到其 schema 的字典
     """
     return {
         "calculator": {
@@ -61,17 +61,17 @@ def get_tool_schema() -> dict:
 
 def execute_tool(tool_name: str, arguments: dict) -> Any:
     """
-    Execute a tool by name with given arguments.
-    
+    按名称并使用给定参数执行一个 tool。
+
     Args:
-        tool_name: Name of the tool to execute
-        arguments: Dictionary of arguments for the tool
-        
+        tool_name: 要执行的 tool 名称
+        arguments: tool 的参数字典
+
     Returns:
-        Result of the tool execution
-        
+        tool 执行的结果
+
     Raises:
-        ValueError: If tool doesn't exist
+        ValueError: 如果 tool 不存在
     """
     tools = {
         "calculator": calculator,

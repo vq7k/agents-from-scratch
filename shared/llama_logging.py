@@ -1,7 +1,7 @@
 import ctypes
 import llama_cpp
 
-# C signature:
+# C 函数签名:
 # void callback(int level, const char * message, void * user_data)
 _LOG_CALLBACK_TYPE = ctypes.CFUNCTYPE(
     None,
@@ -10,15 +10,15 @@ _LOG_CALLBACK_TYPE = ctypes.CFUNCTYPE(
     ctypes.c_void_p,
 )
 
-# Keep a module-level reference so it is NOT garbage-collected
+# 保留一个模块级引用,使其不会被垃圾回收
 _silent_callback_ref = None
 
 
 def disable_llama_logging():
     """
-    Disable all native llama.cpp / ggml logging (Metal, CUDA, CPU).
+    禁用所有 llama.cpp / ggml 的原生日志(Metal、CUDA、CPU)。
 
-    Must be called once, before creating any Llama instances.
+    必须在创建任何 Llama 实例之前调用一次。
     """
     global _silent_callback_ref
 

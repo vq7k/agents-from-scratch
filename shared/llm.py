@@ -1,13 +1,13 @@
 """
-LocalLLM - A simple wrapper around llama-cpp-python.
+LocalLLM —— 对 llama-cpp-python 的简单封装。
 
-This class provides a minimal interface to interact with local language models.
-It intentionally has no magic:
-- No retries (added in lesson 03)
-- No tool calling (added in lesson 05)
-- No memory (added in lesson 07)
+本类提供了与本地语言模型交互的极简接口。
+它刻意不包含任何魔法:
+- 没有重试(在第 03 课加入)
+- 没有 tool calling(在第 05 课加入)
+- 没有记忆(在第 07 课加入)
 
-Just text in, text out.
+只是文本进、文本出。
 """
 
 from shared.llama_logging import disable_llama_logging
@@ -17,9 +17,9 @@ disable_llama_logging()
 
 class LocalLLM:
     """
-    A minimal wrapper for local LLM inference using llama.cpp.
-    
-    This class is intentionally simple and grows throughout the lessons.
+    使用 llama.cpp 进行本地 LLM 推理的极简封装。
+
+    本类刻意保持简单,会在各节课中逐步扩展。
     """
     
     def __init__(
@@ -30,13 +30,13 @@ class LocalLLM:
         n_ctx: int = 2048
     ):
         """
-        Initialize the local LLM.
-        
+        初始化本地 LLM。
+
         Args:
-            model_path: Path to the GGUF model file
-            temperature: Sampling temperature (0.0 = deterministic, 1.0 = creative)
-            max_tokens: Maximum tokens to generate per response
-            n_ctx: Context window size
+            model_path: GGUF 模型文件的路径
+            temperature: 采样温度(0.0 = 确定性,1.0 = 有创造性)
+            max_tokens: 每次响应生成的最大 token 数
+            n_ctx: 上下文窗口大小
         """
         self.llm = Llama(
             model_path=model_path,
@@ -48,15 +48,15 @@ class LocalLLM:
     
     def generate(self, prompt: str, temperature: float = None, stop: list[str] = None) -> str:
         """
-        Generate text from a prompt.
-        
+        根据 prompt 生成文本。
+
         Args:
-            prompt: The input text prompt
-            temperature: Optional temperature override
-            stop: Optional list of stop sequences
-            
+            prompt: 输入的文本 prompt
+            temperature: 可选的温度覆盖值
+            stop: 可选的停止序列列表
+
         Returns:
-            Generated text as a string
+            生成的文本字符串
         """
         kwargs = {
             "prompt": prompt,

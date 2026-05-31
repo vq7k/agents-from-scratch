@@ -1,14 +1,14 @@
 """
-Agent Evaluation Framework.
+Agent 评估框架。
 
-Evals are regression tests for agents.
-An eval suite is just a Python file that runs your agent and asserts things didn't break.
+Eval 是 Agent 的回归测试。
+一个 eval 套件就是一个 Python 文件,运行你的 Agent 并断言没有出现回归。
 
-This module provides:
-- Structured output validation
-- Tool call accuracy testing
-- Memory store/retrieve cycle testing
-- Decision routing validation
+本模块提供:
+- 结构化输出校验
+- tool call 准确性测试
+- 记忆存储/检索循环测试
+- 决策路由校验
 """
 
 from typing import Any, Callable
@@ -17,7 +17,7 @@ from dataclasses import dataclass, field
 
 @dataclass
 class EvalResult:
-    """Result of a single eval case."""
+    """单个 eval 用例的结果。"""
     passed: bool
     input: str
     expected: Any = None
@@ -27,7 +27,7 @@ class EvalResult:
 
 @dataclass 
 class EvalSuiteResult:
-    """Result of running an eval suite."""
+    """运行一个 eval 套件的结果。"""
     name: str
     passed: int = 0
     failed: int = 0
@@ -42,7 +42,7 @@ class EvalSuiteResult:
         return self.passed / self.total if self.total > 0 else 0.0
     
     def add_result(self, result: EvalResult):
-        """Add a result and update counts."""
+        """添加一个结果并更新计数。"""
         self.results.append(result)
         if result.passed:
             self.passed += 1
@@ -50,16 +50,16 @@ class EvalSuiteResult:
             self.failed += 1
     
     def summary(self) -> str:
-        """Generate a human-readable summary."""
+        """生成人类可读的摘要。"""
         status = "✓ PASSED" if self.failed == 0 else "✗ FAILED"
         return f"{self.name}: {status} ({self.passed}/{self.total})"
 
 
 class AgentEval:
     """
-    Regression testing for agent capabilities.
-    
-    Usage:
+    针对 Agent 能力的回归测试。
+
+    用法:
         evaluator = AgentEval(agent)
         results = evaluator.test_structured_output(golden_cases)
         print(results.summary())
@@ -67,24 +67,24 @@ class AgentEval:
     
     def __init__(self, agent):
         """
-        Initialize evaluator with an agent instance.
-        
+        用一个 Agent 实例初始化 evaluator。
+
         Args:
-            agent: The Agent instance to test
+            agent: 待测试的 Agent 实例
         """
         self.agent = agent
     
     def test_structured_output(self, cases: list[dict]) -> EvalSuiteResult:
         """
-        Test that structured output parses correctly and matches schema.
-        
-        This is a HARD assertion - JSON must always be valid.
-        
+        测试结构化输出能否正确解析并匹配 schema。
+
+        这是一个 HARD 断言 —— JSON 必须始终有效。
+
         Args:
-            cases: List of {"input": str, "schema": str, "must_have_fields": list[str]}
-            
+            cases: {"input": str, "schema": str, "must_have_fields": list[str]} 的列表
+
         Returns:
-            EvalSuiteResult with pass/fail counts and details
+            包含通过/失败计数和详情的 EvalSuiteResult
         """
         suite = EvalSuiteResult(name="Structured Output")
         
@@ -96,7 +96,7 @@ class AgentEval:
             try:
                 result = self.agent.generate_structured(input_text, schema)
                 
-                # Check 1: Did we get valid JSON?
+                # 检查 1:是否得到了有效的 JSON?
                 if result is None:
                     suite.add_result(EvalResult(
                         passed=False,
@@ -107,7 +107,7 @@ class AgentEval:
                     ))
                     continue
                 
-                # Check 2: Are required fields present?
+                # 检查 2:必填字段是否都存在?
                 missing_fields = [f for f in required_fields if f not in result]
                 if missing_fields:
                     suite.add_result(EvalResult(
@@ -119,7 +119,7 @@ class AgentEval:
                     ))
                     continue
                 
-                # Passed all checks
+                # 通过所有检查
                 suite.add_result(EvalResult(
                     passed=True,
                     input=input_text,
@@ -137,13 +137,13 @@ class AgentEval:
     
     def test_tool_calls(self, cases: list[dict]) -> EvalSuiteResult:
         """
-        Test tool call accuracy - correct tool selected with valid arguments.
-        
+        测试 tool call 准确性 —— 选对工具且参数有效。
+
         Args:
-            cases: List of {"input": str, "expected_tool": str, "expected_args": dict (optional)}
-            
+            cases: {"input": str, "expected_tool": str, "expected_args": dict(可选)} 的列表
+
         Returns:
-            EvalSuiteResult with pass/fail counts
+            包含通过/失败计数的 EvalSuiteResult
         """
         suite = EvalSuiteResult(name="Tool Calls")
         
@@ -155,7 +155,7 @@ class AgentEval:
             try:
                 tool_call = self.agent.request_tool(input_text)
                 
-                # Check 1: Did we get a tool call?
+                # 检查 1:是否得到了一个 tool call?
                 if tool_call is None:
                     suite.add_result(EvalResult(
                         passed=False,
@@ -166,7 +166,7 @@ class AgentEval:
                     ))
                     continue
                 
-                # Check 2: Is it the right tool?
+                # 检查 2:是不是正确的工具?
                 actual_tool = tool_call.get("tool")
                 if actual_tool != expected_tool:
                     suite.add_result(EvalResult(
@@ -178,7 +178,7 @@ class AgentEval:
                     ))
                     continue
                 
-                # Check 3: Are arguments valid? (if specified)
+                # 检查 3:参数是否有效?(如果指定了的话)
                 if expected_args:
                     actual_args = tool_call.get("arguments", {})
                     for key, expected_val in expected_args.items():
@@ -192,7 +192,7 @@ class AgentEval:
                             ))
                             continue
                 
-                # Passed
+                # 通过
                 suite.add_result(EvalResult(
                     passed=True,
                     input=input_text,
@@ -211,13 +211,13 @@ class AgentEval:
     
     def test_decisions(self, cases: list[dict]) -> EvalSuiteResult:
         """
-        Test decision routing - agent picks correct action from choices.
-        
+        测试决策路由 —— Agent 从候选项中选出正确的动作。
+
         Args:
-            cases: List of {"input": str, "choices": list[str], "expected": str}
-            
+            cases: {"input": str, "choices": list[str], "expected": str} 的列表
+
         Returns:
-            EvalSuiteResult with pass/fail counts
+            包含通过/失败计数的 EvalSuiteResult
         """
         suite = EvalSuiteResult(name="Decisions")
         
@@ -264,13 +264,13 @@ class AgentEval:
     
     def test_memory_cycle(self, cases: list[dict]) -> EvalSuiteResult:
         """
-        Test memory store → retrieve cycle.
-        
+        测试记忆的存储 → 检索循环。
+
         Args:
-            cases: List of {"store_input": str, "query_input": str, "expected_in_response": str}
-            
+            cases: {"store_input": str, "query_input": str, "expected_in_response": str} 的列表
+
         Returns:
-            EvalSuiteResult with pass/fail counts
+            包含通过/失败计数的 EvalSuiteResult
         """
         suite = EvalSuiteResult(name="Memory Cycle")
         
@@ -280,10 +280,10 @@ class AgentEval:
             expected_substring = case.get("expected_in_response", "")
             
             try:
-                # Clear memory for clean test
+                # 清空记忆以保证测试干净
                 self.agent.memory.clear()
                 
-                # Step 1: Store
+                # 步骤 1:存储
                 store_response = self.agent.run_with_memory(store_input)
                 if store_response is None:
                     suite.add_result(EvalResult(
@@ -293,7 +293,7 @@ class AgentEval:
                     ))
                     continue
                 
-                # Step 2: Query
+                # 步骤 2:查询
                 query_response = self.agent.run_with_memory(query_input)
                 if query_response is None:
                     suite.add_result(EvalResult(
@@ -303,7 +303,7 @@ class AgentEval:
                     ))
                     continue
                 
-                # Step 3: Check response contains expected info
+                # 步骤 3:检查响应是否包含预期信息
                 reply = query_response.get("reply", "")
                 if expected_substring.lower() in reply.lower():
                     suite.add_result(EvalResult(
@@ -336,16 +336,16 @@ class AgentEval:
                 decision_cases: list[dict] = None,
                 memory_cases: list[dict] = None) -> list[EvalSuiteResult]:
         """
-        Run all eval suites.
-        
+        运行所有 eval 套件。
+
         Args:
-            structured_cases: Cases for structured output testing
-            tool_cases: Cases for tool call testing
-            decision_cases: Cases for decision testing
-            memory_cases: Cases for memory testing
-            
+            structured_cases: 用于结构化输出测试的用例
+            tool_cases: 用于 tool call 测试的用例
+            decision_cases: 用于决策测试的用例
+            memory_cases: 用于记忆测试的用例
+
         Returns:
-            List of all EvalSuiteResults
+            所有 EvalSuiteResult 的列表
         """
         results = []
         
@@ -366,10 +366,10 @@ class AgentEval:
 
 def print_eval_report(results: list[EvalSuiteResult]):
     """
-    Print a formatted eval report.
-    
+    打印格式化的 eval 报告。
+
     Args:
-        results: List of EvalSuiteResults to report
+        results: 待报告的 EvalSuiteResult 列表
     """
     print("\n" + "="*50)
     print("EVAL REPORT")
@@ -381,7 +381,7 @@ def print_eval_report(results: list[EvalSuiteResult]):
     for suite in results:
         print(f"\n{suite.summary()}")
         
-        # Show failures
+        # 显示失败项
         for result in suite.results:
             if not result.passed:
                 print(f"  ✗ Input: {result.input[:50]}...")

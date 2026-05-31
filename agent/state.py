@@ -1,40 +1,40 @@
 """
-Agent state management.
+Agent 状态管理。
 
-State is explicit, inspectable, and modifiable.
-It's not hidden in conversation history or mysterious context.
+状态是显式的、可检视的、可修改的。
+它不会隐藏在对话历史里,也不会藏在某种神秘的上下文中。
 """
 
 
 class AgentState:
     """
-    Represents the current state of the agent.
-    
-    This grows throughout the lessons as we add capabilities:
-    - Lesson 06: Basic state (steps, done)
-    - Lesson 07: Add memory tracking
-    - Lesson 08: Add planning state
-    - Lesson 09: Add execution state
-    - Lesson 10: Add dependency tracking
+    表示 Agent 的当前状态。
+
+    随着课程推进、不断增加能力,它也会随之扩展:
+    - 第 06 课:基础状态(steps、done)
+    - 第 07 课:加入记忆追踪
+    - 第 08 课:加入规划状态
+    - 第 09 课:加入执行状态
+    - 第 10 课:加入依赖追踪
     """
     
     def __init__(self):
-        """Initialize a new agent state."""
+        """初始化一个新的 Agent 状态。"""
         self.steps = 0
         self.done = False
         self.current_plan = None
         self.last_action = None
     
     def increment_step(self):
-        """Increment the step counter."""
+        """让步数计数器加一。"""
         self.steps += 1
     
     def mark_done(self):
-        """Mark the agent's task as complete."""
+        """将 Agent 的任务标记为完成。"""
         self.done = True
     
     def reset(self):
-        """Reset the state for a new task."""
+        """为新任务重置状态。"""
         self.steps = 0
         self.done = False
         self.current_plan = None
@@ -42,10 +42,10 @@ class AgentState:
     
     def to_dict(self) -> dict:
         """
-        Convert state to a dictionary for serialization or prompts.
-        
+        将状态转换为字典,用于序列化或构建 prompt。
+
         Returns:
-            Dictionary representation of the state
+            状态的字典表示
         """
         return {
             "steps": self.steps,
@@ -55,5 +55,5 @@ class AgentState:
         }
     
     def __repr__(self) -> str:
-        """String representation of the state."""
+        """状态的字符串表示。"""
         return f"AgentState(steps={self.steps}, done={self.done})"

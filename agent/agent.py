@@ -1,20 +1,20 @@
 """
-The Agent - This file grows across all 10 lessons.
+Agent —— 本文件贯穿全部 10 节课逐步成长。
 
-This is the heart of the repository. Each lesson adds exactly one capability
-to this agent, building understanding progressively.
+这是本仓库的核心。每节课恰好为这个 agent 增加一项能力，
+循序渐进地建立理解。
 
-Lesson progression:
-01: Basic LLM chat
-02: System prompts (roles)
-03: Structured outputs (JSON)
-04: Decision-making
-05: Tool calling
-06: Agent loop
-07: Memory
-08: Planning
-09: Atomic actions
-10: AoT (Atom of Thought)
+课程进度：
+01：基础 LLM 对话
+02：system prompt（角色）
+03：结构化输出（JSON）
+04：决策
+05：tool calling
+06：agent loop
+07：记忆
+08：规划
+09：原子动作
+10：AoT（Atom of Thought，思维原子）
 """
 
 from typing import Any
@@ -29,97 +29,97 @@ from agent.planner import create_plan, create_atomic_action, create_aot_graph, e
 
 class Agent:
     """
-    An AI agent that grows in capability across lessons.
-    
-    This is the same agent throughout the repository - it just gains
-    new methods and capabilities as lessons progress.
+    一个能力随课程逐步成长的 AI agent。
+
+    在整个仓库中这始终是同一个 agent —— 它只是随着课程推进
+    不断获得新的方法和能力。
     """
     
     def __init__(self, model_path: str):
         """
-        Initialize the agent.
-        
+        初始化 agent。
+
         Args:
-            model_path: Path to the GGUF model file
+            model_path: GGUF 模型文件的路径
         """
-        # Lesson 01: Basic LLM interaction
+        # 第 01 课：基础 LLM 交互
         self.llm = LocalLLM(model_path)
-        
-        # Lesson 02: System prompt for consistent behavior
+
+        # 第 02 课：用 system prompt 保证行为一致
         self.system_prompt = (
             "You are a calm, precise, and helpful AI assistant. "
             "You explain concepts simply and avoid unnecessary jargon. "
             "You are honest about what you know and don't know."
         )
         
-        # Lesson 06: Agent state
+        # 第 06 课：agent 状态
         self.state = AgentState()
-        
-        # Lesson 07: Memory system
+
+        # 第 07 课：记忆系统
         self.memory = Memory()
     
     # ============================================================
-    # LESSON 01: Basic LLM Chat
+    # 第 01 课：基础 LLM 对话
     # ============================================================
-    
+
     def simple_generate(self, user_input: str) -> str:
         """
-        Simplest possible interaction - just pass text to the LLM.
-        
-        Lesson 01 version.
-        
+        最简单的交互方式 —— 直接把文本传给 LLM。
+
+        第 01 课版本。
+
         Args:
-            user_input: The user's question or request
-            
+            user_input: 用户的问题或请求
+
         Returns:
-            The model's response
+            模型的回复
         """
         return self.llm.generate(user_input)
     
     # ============================================================
-    # LESSON 02: System Prompts (Roles)
+    # 第 02 课：system prompt（角色）
     # ============================================================
-    
+
     def generate_with_role(self, user_input: str) -> str:
         """
-        Generate with a system prompt to shape behavior.
-        
-        Lesson 02 version.
-        
+        借助 system prompt 来塑造行为后再生成。
+
+        第 02 课版本。
+
         Args:
-            user_input: The user's question or request
-            
+            user_input: 用户的问题或请求
+
         Returns:
-            The model's response with role-based behavior
+            带有角色化行为的模型回复
         """
-        # Use a format that doesn't confuse the model
+        # 使用一种不会让模型混淆的格式
         prompt = f"""{self.system_prompt}
 
 User: {user_input}
 Assistant:"""
         
         response = self.llm.generate(prompt)
-        # Clean up any potential tag artifacts
+        # 清理可能残留的标签碎片
         response = response.replace('<SYSTEM>', '').replace('</SYSTEM>', '')
         response = response.replace('<USER>', '').replace('</USER>', '')
         return response.strip()
     
     # ============================================================
-    # LESSON 03: Structured Outputs
+    # 第 03 课：结构化输出
     # ============================================================
-    
+
     def generate_structured(self, user_input: str, schema: str) -> dict | None:
         """
-        Generate structured JSON output with validation and retries.
-        
-        Lesson 03 version.
-        
+        生成带校验和重试的结构化 JSON 输出。
+
+        第 03 课版本。
+
         Args:
-            user_input: The user's question or request
-            schema: JSON schema description
-            
+            user_input: 用户的问题或请求
+            schema: JSON schema 描述
+
         Returns:
-            Parsed JSON dictionary or None if all retries failed
+            解析后的 JSON 字典；若所有重试都失败则返回 None
         """
         prompt = f"""{self.system_prompt}
 
@@ -135,32 +135,32 @@ User request: {user_input}
 
 Response (JSON only):"""
         
-        # Try up to 3 times
+        # 最多重试 3 次
         for attempt in range(3):
             response = self.llm.generate(prompt, temperature=0.0)
             parsed = extract_json_from_text(response)
-            
+
             if parsed is not None:
                 return parsed
         
         return None
     
     # ============================================================
-    # LESSON 04: Decision Making
+    # 第 04 课：决策
     # ============================================================
-    
+
     def decide(self, user_input: str, choices: list[str]) -> str | None:
         """
-        Make the model choose from a finite set of options.
-        
-        Lesson 04 version.
-        
+        让模型从有限的选项集合中做出选择。
+
+        第 04 课版本。
+
         Args:
-            user_input: The input to make a decision about
-            choices: List of possible actions/decisions
-            
+            user_input: 需要据此做决策的输入
+            choices: 可选动作/决策的列表
+
         Returns:
-            The chosen action or None if decision failed
+            选中的动作；若决策失败则返回 None
         """
         options = "\n".join(f"- {choice}" for choice in choices)
         
@@ -195,20 +195,20 @@ Response (JSON only):"""
         return None
     
     # ============================================================
-    # LESSON 05: Tools
+    # 第 05 课：工具
     # ============================================================
-    
+
     def request_tool(self, user_input: str) -> dict | None:
         """
-        Have the model request a tool call.
-        
-        Lesson 05 version.
-        
+        让模型发起一次 tool call。
+
+        第 05 课版本。
+
         Args:
-            user_input: The user's request
-            
+            user_input: 用户的请求
+
         Returns:
-            Tool call specification or None if request failed
+            tool call 的规格说明；若请求失败则返回 None
         """
         prompt = f"""{self.system_prompt}
 
@@ -240,31 +240,31 @@ Response (JSON only):"""
     
     def execute_tool_call(self, tool_call: dict) -> Any:
         """
-        Execute a tool call requested by the model.
-        
+        执行模型发起的一次 tool call。
+
         Args:
-            tool_call: Dictionary with "tool" and "arguments"
-            
+            tool_call: 包含 "tool" 和 "arguments" 的字典
+
         Returns:
-            Result of the tool execution
+            工具执行的结果
         """
         return execute_tool(tool_call["tool"], tool_call["arguments"])
     
     # ============================================================
-    # LESSON 06: Agent Loop
+    # 第 06 课：agent loop
     # ============================================================
-    
+
     def agent_step(self, user_input: str) -> dict | None:
         """
-        Execute one step of the agent loop: observe → decide → act.
-        
-        Lesson 06 version.
-        
+        执行 agent loop 的一步：观察 → 决策 → 行动。
+
+        第 06 课版本。
+
         Args:
-            user_input: User's input or system observation
-            
+            user_input: 用户输入或系统观察结果
+
         Returns:
-            Action decision or None if step failed
+            行动决策；若该步失败则返回 None
         """
         state_dict = self.state.to_dict()
         
@@ -302,14 +302,14 @@ Response (JSON only):"""
     
     def run_loop(self, user_input: str, max_steps: int = 5):
         """
-        Run the agent loop for multiple steps.
-        
+        运行 agent loop 多步。
+
         Args:
-            user_input: Initial user input
-            max_steps: Maximum number of steps to execute
-            
+            user_input: 初始用户输入
+            max_steps: 最多执行的步数
+
         Returns:
-            List of action results
+            行动结果的列表
         """
         self.state.reset()
         results = []
@@ -320,7 +320,7 @@ Response (JSON only):"""
             if action:
                 results.append(action)
                 
-                # Simple termination condition
+                # 简单的终止条件
                 if action.get("action") == "done":
                     self.state.mark_done()
             else:
@@ -329,24 +329,24 @@ Response (JSON only):"""
         return results
     
     # ============================================================
-    # LESSON 07: Memory
+    # 第 07 课：记忆
     # ============================================================
-    
+
     def run_with_memory(self, user_input: str) -> dict | None:
         """
-        Run agent with memory context.
-        
-        Lesson 07 version.
-        
+        带记忆上下文运行 agent。
+
+        第 07 课版本。
+
         Args:
-            user_input: User's input
-            
+            user_input: 用户输入
+
         Returns:
-            Response with potential memory update
+            回复，可能附带一次记忆更新
         """
         memory_context = self.memory.get_all()
-        
-        # Build memory context string
+
+        # 构造记忆上下文字符串
         if memory_context:
             memory_str = "You remember the following:\n" + "\n".join(f"- {item}" for item in memory_context)
         else:
@@ -381,7 +381,7 @@ Response (JSON only):"""
             parsed = extract_json_from_text(response)
             
             if parsed and "reply" in parsed:
-                # Save to memory if requested
+                # 如有要求则存入记忆
                 if parsed.get("save_to_memory"):
                     self.memory.add(parsed["save_to_memory"])
                 
@@ -391,20 +391,20 @@ Response (JSON only):"""
         return None
     
     # ============================================================
-    # LESSON 08: Planning
+    # 第 08 课：规划
     # ============================================================
-    
+
     def create_plan(self, goal: str) -> dict | None:
         """
-        Generate a plan to achieve a goal.
-        
-        Lesson 08 version.
-        
+        生成一个用于达成目标的规划。
+
+        第 08 课版本。
+
         Args:
-            goal: The goal to achieve
-            
+            goal: 要达成的目标
+
         Returns:
-            Plan with steps
+            包含若干步骤的规划
         """
         plan = create_plan(self.llm, goal)
         
@@ -415,13 +415,13 @@ Response (JSON only):"""
     
     def execute_plan(self, plan: dict) -> list:
         """
-        Execute a plan step by step.
-        
+        逐步执行一个规划。
+
         Args:
-            plan: Plan dictionary with "steps" list
-            
+            plan: 包含 "steps" 列表的规划字典
+
         Returns:
-            List of execution results
+            执行结果的列表
         """
         if not plan or "steps" not in plan:
             return []
@@ -429,7 +429,7 @@ Response (JSON only):"""
         results = []
         
         for step in plan["steps"]:
-            # Simple execution - in reality you'd call tools, etc.
+            # 简化的执行 —— 实际中你会在这里调用工具等等
             result = {
                 "step": step,
                 "executed": True
@@ -440,84 +440,84 @@ Response (JSON only):"""
         return results
     
     # ============================================================
-    # LESSON 09: Atomic Actions
+    # 第 09 课：原子动作
     # ============================================================
-    
+
     def create_atomic_action(self, step: str) -> dict | None:
         """
-        Convert a plan step into an atomic action.
-        
-        Lesson 09 version.
-        
-        Atomic actions are the smallest possible actions that can be:
-        - Validated independently
-        - Tested in isolation
-        - Executed safely
-        - Rolled back if needed
-        
+        把规划中的一个步骤转换成一个原子动作。
+
+        第 09 课版本。
+
+        原子动作是尽可能最小的动作，它们可以：
+        - 被独立校验
+        - 被隔离测试
+        - 被安全执行
+        - 在需要时被回滚
+
         Args:
-            step: A step from a plan (e.g., "Write an explanation of AI agents")
-            
+            step: 规划中的一个步骤（例如 "Write an explanation of AI agents"）
+
         Returns:
-            Atomic action dictionary with "action" and "inputs", or None if generation failed
+            包含 "action" 和 "inputs" 的原子动作字典；若生成失败则返回 None
         """
         return create_atomic_action(self.llm, step)
     
     # ============================================================
-    # LESSON 10: Atom of Thought (AoT)
+    # 第 10 课：Atom of Thought（AoT，思维原子）
     # ============================================================
-    
+
     def create_aot_plan(self, goal: str) -> dict | None:
         """
-        Generate an AoT execution graph.
-        
-        Lesson 10 version.
-        
+        生成一张 AoT 执行图。
+
+        第 10 课版本。
+
         Args:
-            goal: The goal to achieve
-            
+            goal: 要达成的目标
+
         Returns:
-            AoT graph with atomic nodes and dependencies
+            包含原子节点及依赖关系的 AoT 图
         """
         return create_aot_graph(self.llm, goal)
     
     def execute_aot_plan(self, graph: dict) -> list:
         """
-        Execute an AoT graph respecting dependencies.
-        
+        按依赖关系执行一张 AoT 图。
+
         Args:
-            graph: AoT graph
-            
+            graph: AoT 图
+
         Returns:
-            List of execution results
+            执行结果的列表
         """
         def execute_action(action: str):
-            # Placeholder for actual action execution
+            # 实际动作执行的占位实现
             return f"Executed: {action}"
         
         return execute_graph(graph, execute_action)
     
     # ============================================================
-    # MAIN RUN METHOD (evolves across lessons)
+    # 主运行方法（随课程演进）
     # ============================================================
-    
+
     def run(self, user_input: str) -> str:
         """
-        Main entry point for the agent.
-        
-        This method evolves across lessons to use different capabilities.
-        Currently, at: Lesson 07 (with memory)
-        
+        agent 的主入口。
+
+        该方法随课程演进，使用不同的能力。
+        当前处于：第 07 课（带记忆）
+
         Args:
-            user_input: The user's question or request
-            
+            user_input: 用户的问题或请求
+
         Returns:
-            The agent's response
+            agent 的回复
         """
         result = self.run_with_memory(user_input)
         
         if result and "reply" in result:
             return result["reply"]
         
-        # Fallback to simple generation
+        # 回退到简单生成
         return self.generate_with_role(user_input)
