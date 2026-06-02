@@ -62,23 +62,69 @@ class LocalLLM:
         Returns:
             生成的文本字符串
         """
+
+        # 老式 Vicuna / Llama-2 风格
+        # assistant_ = ["</s>", "\n\n", "User:", "Assistant:"]
+        assistant_ = ["<|im_end|>"]
+
         kwargs = {
             "prompt": prompt,
             "max_tokens": self.max_tokens,
-            # FIXME（qwen 适配 · 必改）：这组 stop 是老式 Vicuna / Llama-2 风格，但本机模型其实是 qwen2.5（ChatML）。
-            #   · "</s>" 是 Llama-2 的结束符，对 qwen 完全无效（qwen 的结束符是 <|im_end|>）；
-            #   · "\n\n" 会误伤：qwen 回答里一出现空行就被提前截断。
-            #   用 qwen 时改成 → "stop": stop if stop is not None else ["<|im_end|>"]
-            "stop": stop if stop is not None else ["</s>", "\n\n", "User:", "Assistant:"],
+            "stop": stop if stop is not None else assistant_,
         }
         
         if temperature is not None:
             kwargs["temperature"] = temperature
-        
-        # FIXME（qwen 适配 · 进阶/可选）：这里用 raw completion（__call__），不套任何对话模板。
-        #   更彻底的做法是 self.llm.create_chat_completion(messages=[{"role": ..., "content": ...}])，
-        #   它会自动读 GGUF 内置的 ChatML 模板 + 用正确 eos，换任何模型都不必再手改 stop。
-        #   代价：generate() 入参要从「prompt 字符串」改成「messages 列表」，牵连所有调用方。
-        #   教学版保留 raw 是有意为之（看清裸机制），知道有这条路即可。
+
         response = self.llm(**kwargs)
+
+        print("=== qwen 原始 response ===")
+        print(response)
+        print("=== 生成文本(strip 前) ===", repr(response["choices"][0]["text"]))
+        print("=== 停止原因 ===", response["choices"][0]["finish_reason"])
+
+        # === Before Res ===
+        # {
+        #     'id': 'cmpl-fec368c6-0d81-4ec5-86af-0b3395af0342',
+        #     'object': 'text_completion',
+        #     'created': 1780389582,
+        #     'model': '/Users/xxxx/IdeaProjects/agents-from-scratch/models/llama-3-8b-instruct.gguf',
+        #     'choices': [
+        #         {
+        #             'text': ' 1.0.0',
+        #             'index': 0,
+        #             'logprobs': None,
+        #             'finish_reason': 'stop'
+        #         }
+        #     ],
+        #     'usage': {
+        #         'prompt_tokens': 32,
+        #         'completion_tokens': 7,
+        #         'total_tokens': 39
+        #     }
+        # }
+        # === 生成文本(strip 前) === ' 1.0.0'
+        # === 停止原因 === stop
+
+        # === After Res ===
+        # {
+        #   'id': 'cmpl-ed6d8ab4-4af8-4e29-a972-4cc5ea6f72b4',
+        #   'object': 'text_completion',
+        #   'created': 1780395353,
+        #   'model': '/Users/xxxx/IdeaProjects/agents-from-scratch/models/llama-3-8b-instruct.gguf',
+        #   'choices': [
+        #     {
+        #       'text': ' 1.0.0\n\n第一段：天气不错。\n\n第二段：DONE_MARKER 1.0.0\n\n好的，以下是逐字重复的内容，包括中间的空行：\n\n第一段：天气不错。\n\n第二段：DONE_MARKER 1.0.0\n\n第一段：天气不错。\n\n第二段：DONE_MARKER 1.0.0\n\n请确认是否需要重复第一段的内容？如果需要，我会重复。如果不需要，我将只重复第二段的内容。 根据您的要求，我将重复第一段的内容：\n\n第一段：天气不错。\n\n第二段：DONE_MARKER 1.',
+        #       'index': 0,
+        #       'logprobs': None,
+        #       'finish_reason': 'length'
+        #     }
+        #   ],
+        #   'usage': {
+        #     'prompt_tokens': 32,
+        #     'completion_tokens': 128,
+        #     'total_tokens': 160
+        #   }
+        # }
+
         return response["choices"][0]["text"].strip()
