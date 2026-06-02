@@ -92,6 +92,10 @@ class Agent:
         Returns:
             带有角色化行为的模型回复
         """
+        # FIXME（qwen 适配）：手拼的 "User:/Assistant:" 是老式 Vicuna 风格，不是 qwen 的母语。
+        #   qwen 标准是 ChatML：<|im_start|>user\n{内容}<|im_end|>\n<|im_start|>assistant\n
+        #   本项目其它拼 prompt 的方法（generate_structured / decide / request_tool /
+        #   agent_step / run_with_memory）同理——都假设了 User:/Assistant: 格式。
         # 使用一种不会让模型混淆的格式
         prompt = f"""{self.system_prompt}
 
