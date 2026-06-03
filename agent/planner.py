@@ -23,7 +23,7 @@ def create_plan(llm: LocalLLM, goal: str) -> dict | None:
     """
     from shared.utils import extract_json_from_text
     
-    prompt = f"""Create a step-by-step plan to achieve the goal. Respond with ONLY valid JSON.
+    prompt = f"""制定一个分步骤的计划来达成目标。Respond with ONLY valid JSON.
 
 CRITICAL INSTRUCTIONS:
 1. Respond with ONLY valid JSON
@@ -31,9 +31,9 @@ CRITICAL INSTRUCTIONS:
 3. Start your response with {{ and end with }}
 
 Required JSON format:
-{{"steps": ["step1", "step2", "step3"]}}
+{{"steps": ["步骤1", "步骤2", "步骤3"]}}
 
-Goal: {goal}
+目标: {goal}
 
 Response (JSON only):"""
     
@@ -62,7 +62,7 @@ def create_atomic_action(llm: LocalLLM, step: str) -> dict | None:
     """
     from shared.utils import extract_json_from_text
     
-    prompt = f"""Convert this step into an atomic action. Respond with ONLY valid JSON.
+    prompt = f"""将这个步骤转换为一个原子动作。Respond with ONLY valid JSON.
 
 CRITICAL INSTRUCTIONS:
 1. Respond with ONLY valid JSON
@@ -71,14 +71,14 @@ CRITICAL INSTRUCTIONS:
 
 Required JSON format:
 {{
-  "action": "action_name",
-  "inputs": {{"key": "value"}}
+  "action": "动作名",
+  "inputs": {{"参数名": "参数值"}}
 }}
 
-The action should be a simple, atomic operation name.
-The inputs should be a dictionary with the parameters needed for this action.
+action 应该是一个简单的、原子化的操作名称。
+inputs 应该是一个字典,包含该动作所需的参数。
 
-Step to convert:
+待转换的步骤:
 {step}
 
 Response (JSON only):"""
@@ -108,7 +108,7 @@ def create_aot_graph(llm: LocalLLM, goal: str) -> dict | None:
     """
     from shared.utils import extract_json_from_text
     
-    prompt = f"""Create an atomic execution graph for the goal. Each node is a single action. Dependencies are node IDs. Respond with ONLY valid JSON.
+    prompt = f"""为目标生成一个原子执行图。每个节点是一个单一动作。依赖关系用节点 ID 表示。Respond with ONLY valid JSON.
 
 CRITICAL INSTRUCTIONS:
 1. Respond with ONLY valid JSON
@@ -118,12 +118,12 @@ CRITICAL INSTRUCTIONS:
 Required JSON format:
 {{"nodes": [{{"id": "1", "action": "research", "depends_on": []}}, {{"id": "2", "action": "write", "depends_on": ["1"]}}]}}
 
-Each node must have:
-- id: unique string like "1", "2", "3"
-- action: what to do (e.g., "research", "write", "review")
-- depends_on: list of node IDs that must complete first (empty [] for first step)
+每个节点必须包含:
+- id: 唯一的字符串,例如 "1"、"2"、"3"
+- action: 要做的事情(例如 "research"、"write"、"review")
+- depends_on: 必须先完成的节点 ID 列表(第一步用空列表 [])
 
-Goal: {goal}
+目标: {goal}
 
 Response (JSON only):"""
     

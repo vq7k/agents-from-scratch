@@ -34,7 +34,7 @@ class Agent:
     在整个仓库中这始终是同一个 agent —— 它只是随着课程推进
     不断获得新的方法和能力。
     """
-    
+
     def __init__(self, model_path: str):
         """
         初始化 agent。
@@ -47,17 +47,18 @@ class Agent:
 
         # 第 02 课：用 system prompt 保证行为一致
         self.system_prompt = (
-            "You are a calm, precise, and helpful AI assistant. "
-            "You explain concepts simply and avoid unnecessary jargon. "
-            "You are honest about what you know and don't know."
+            "你是一个冷静、严谨、乐于助人的 AI 助手。"
+            "你用简单的方式解释概念，避免不必要的术语。"
+            "你对自己知道和不知道的事情都保持诚实。"
+            "始终用中文回答。"
         )
-        
+
         # 第 06 课：agent 状态
         self.state = AgentState()
 
         # 第 07 课：记忆系统
         self.memory = Memory()
-    
+
     # ============================================================
     # 第 01 课：基础 LLM 对话
     # ============================================================
@@ -75,7 +76,7 @@ class Agent:
             模型的回复
         """
         return self.llm.generate(user_input)
-    
+
     # ============================================================
     # 第 02 课：system prompt（角色）
     # ============================================================
@@ -99,15 +100,15 @@ class Agent:
         # 使用一种不会让模型混淆的格式
         prompt = f"""{self.system_prompt}
 
-User: {user_input}
-Assistant:"""
-        
+        User: {user_input}
+        Assistant:"""
+
         response = self.llm.generate(prompt)
         # 清理可能残留的标签碎片
         response = response.replace('<SYSTEM>', '').replace('</SYSTEM>', '')
         response = response.replace('<USER>', '').replace('</USER>', '')
         return response.strip()
-    
+
     # ============================================================
     # 第 03 课：结构化输出
     # ============================================================
@@ -138,7 +139,7 @@ Schema you must follow:
 User request: {user_input}
 
 Response (JSON only):"""
-        
+
         # 最多重试 3 次
         for attempt in range(3):
             response = self.llm.generate(prompt, temperature=0.0)
@@ -146,9 +147,9 @@ Response (JSON only):"""
 
             if parsed is not None:
                 return parsed
-        
+
         return None
-    
+
     # ============================================================
     # 第 04 课：决策
     # ============================================================
@@ -167,37 +168,37 @@ Response (JSON only):"""
             选中的动作；若决策失败则返回 None
         """
         options = "\n".join(f"- {choice}" for choice in choices)
-        
+
         prompt = f"""{self.system_prompt}
 
-You must choose ONE of the following options. Respond with ONLY valid JSON.
+你必须从以下选项中选择一个。Respond with ONLY valid JSON.
 
 CRITICAL INSTRUCTIONS:
 1. Respond with ONLY valid JSON
 2. No explanations, no markdown, no other text
 3. Start your response with {{ and end with }}
 
-Available choices:
+可选项:
 {options}
 
 Required JSON format:
-{{"decision": "one_of_the_choices_above"}}
+{{"decision": "上述选项之一"}}
 
-User request: {user_input}
+用户请求: {user_input}
 
 Response (JSON only):"""
-        
+
         for attempt in range(3):
             response = self.llm.generate(prompt, temperature=0.0)
             parsed = extract_json_from_text(response)
-            
+
             if parsed and "decision" in parsed:
                 decision = parsed["decision"]
                 if decision in choices:
                     return decision
-        
+
         return None
-    
+
     # ============================================================
     # 第 05 课：工具
     # ============================================================
@@ -216,10 +217,10 @@ Response (JSON only):"""
         """
         prompt = f"""{self.system_prompt}
 
-You are a tool-calling assistant. When asked a math question, you must respond with ONLY valid JSON.
+你是一个会调用工具的助手,只回答数学问题。Respond with ONLY valid JSON.
 
-Available tool: calculator
-- Parameters: a (number), b (number), operation ("add", "subtract", "multiply", or "divide")
+可用工具: calculator
+- 参数: a (数字), b (数字), operation ("add"、"subtract"、"multiply" 或 "divide")
 
 CRITICAL INSTRUCTIONS:
 1. Respond with ONLY valid JSON
@@ -229,19 +230,19 @@ CRITICAL INSTRUCTIONS:
 Example format:
 {{"tool": "calculator", "arguments": {{"a": 42, "b": 7, "operation": "multiply"}}}}
 
-User request: {user_input}
+用户请求: {user_input}
 
 Response (JSON only):"""
-        
+
         for attempt in range(3):
             response = self.llm.generate(prompt, temperature=0.0)
             parsed = extract_json_from_text(response)
-            
+
             if parsed and "tool" in parsed and "arguments" in parsed:
                 return parsed
-        
+
         return None
-    
+
     def execute_tool_call(self, tool_call: dict) -> Any:
         """
         执行模型发起的一次 tool call。
@@ -253,7 +254,7 @@ Response (JSON only):"""
             工具执行的结果
         """
         return execute_tool(tool_call["tool"], tool_call["arguments"])
-    
+
     # ============================================================
     # 第 06 课：agent loop
     # ============================================================
@@ -271,14 +272,14 @@ Response (JSON only):"""
             行动决策；若该步失败则返回 None
         """
         state_dict = self.state.to_dict()
-        
+
         prompt = f"""{self.system_prompt}
 
-You are an agent. You must decide the next action and respond with ONLY valid JSON.
+你是一个 agent,必须决定下一个动作。Respond with ONLY valid JSON.
 
-Current state: steps={state_dict.get('steps', 0)}, done={state_dict.get('done', False)}
+当前状态: steps={state_dict.get('steps', 0)}, done={state_dict.get('done', False)}
 
-Available actions: analyze, research, summarize, answer, done
+可用动作: analyze, research, summarize, answer, done
 
 CRITICAL INSTRUCTIONS:
 1. Respond with ONLY valid JSON
@@ -286,24 +287,24 @@ CRITICAL INSTRUCTIONS:
 3. Start your response with {{ and end with }}
 
 Required JSON format:
-{{"action": "action_name", "reason": "explanation"}}
+{{"action": "动作名", "reason": "理由说明"}}
 
-User input: {user_input}
+用户输入: {user_input}
 
 Response (JSON only):"""
-        
+
         for attempt in range(3):
             response = self.llm.generate(prompt, temperature=0.0)
             parsed = extract_json_from_text(response)
-            
+
             if parsed and "action" in parsed:
                 if "reason" not in parsed:
                     parsed["reason"] = f"Taking action: {parsed['action']}"
                 self.state.increment_step()
                 return parsed
-        
+
         return None
-    
+
     def run_loop(self, user_input: str, max_steps: int = 5):
         """
         运行 agent loop 多步。
@@ -317,21 +318,21 @@ Response (JSON only):"""
         """
         self.state.reset()
         results = []
-        
+
         while not self.state.done and self.state.steps < max_steps:
             action = self.agent_step(user_input)
-            
+
             if action:
                 results.append(action)
-                
+
                 # 简单的终止条件
                 if action.get("action") == "done":
                     self.state.mark_done()
             else:
                 break
-        
+
         return results
-    
+
     # ============================================================
     # 第 07 课：记忆
     # ============================================================
@@ -352,13 +353,13 @@ Response (JSON only):"""
 
         # 构造记忆上下文字符串
         if memory_context:
-            memory_str = "You remember the following:\n" + "\n".join(f"- {item}" for item in memory_context)
+            memory_str = "你记得以下内容:\n" + "\n".join(f"- {item}" for item in memory_context)
         else:
-            memory_str = "You have no memories yet."
-        
+            memory_str = "你目前还没有任何记忆。"
+
         prompt = f"""{self.system_prompt}
 
-You are an agent with memory. You must respond with ONLY valid JSON.
+你是一个带记忆的 agent。Respond with ONLY valid JSON.
 
 {memory_str}
 
@@ -366,34 +367,34 @@ CRITICAL INSTRUCTIONS:
 1. Respond with ONLY valid JSON
 2. No explanations, no markdown, no other text
 3. Start your response with {{ and end with }}
-4. If the user tells you information (like their name), save it to memory
-5. If the user asks about something you remember, USE YOUR MEMORY to answer
+4. 如果用户告诉你信息(比如名字),把它存入记忆
+5. 如果用户问起你记得的事情,用你的记忆来回答
 
 Required JSON format:
-{{"reply": "your response text", "save_to_memory": "fact to remember" or null}}
+{{"reply": "你的回复文本", "save_to_memory": "要记住的事实" or null}}
 
-Examples:
-- User says "My name is Alice" → {{"reply": "Nice to meet you, Alice!", "save_to_memory": "User's name is Alice"}}
-- User asks "What's my name?" and you remember "User's name is Alice" → {{"reply": "Your name is Alice", "save_to_memory": null}}
+示例:
+- 用户说 "我叫小爱" → {{"reply": "很高兴认识你,小爱!", "save_to_memory": "用户的名字是小爱"}}
+- 用户问 "我叫什么名字?" 而你记得 "用户的名字是小爱" → {{"reply": "你叫小爱", "save_to_memory": null}}
 
-User input: {user_input}
+用户输入: {user_input}
 
 Response (JSON only):"""
-        
+
         for attempt in range(3):
             response = self.llm.generate(prompt, temperature=0.0)
             parsed = extract_json_from_text(response)
-            
+
             if parsed and "reply" in parsed:
                 # 如有要求则存入记忆
                 if parsed.get("save_to_memory"):
                     self.memory.add(parsed["save_to_memory"])
-                
+
                 self.state.increment_step()
                 return parsed
-        
+
         return None
-    
+
     # ============================================================
     # 第 08 课：规划
     # ============================================================
@@ -411,12 +412,12 @@ Response (JSON only):"""
             包含若干步骤的规划
         """
         plan = create_plan(self.llm, goal)
-        
+
         if plan:
             self.state.current_plan = plan
-        
+
         return plan
-    
+
     def execute_plan(self, plan: dict) -> list:
         """
         逐步执行一个规划。
@@ -429,9 +430,9 @@ Response (JSON only):"""
         """
         if not plan or "steps" not in plan:
             return []
-        
+
         results = []
-        
+
         for step in plan["steps"]:
             # 简化的执行 —— 实际中你会在这里调用工具等等
             result = {
@@ -440,9 +441,9 @@ Response (JSON only):"""
             }
             results.append(result)
             self.state.increment_step()
-        
+
         return results
-    
+
     # ============================================================
     # 第 09 课：原子动作
     # ============================================================
@@ -466,7 +467,7 @@ Response (JSON only):"""
             包含 "action" 和 "inputs" 的原子动作字典；若生成失败则返回 None
         """
         return create_atomic_action(self.llm, step)
-    
+
     # ============================================================
     # 第 10 课：Atom of Thought（AoT，思维原子）
     # ============================================================
@@ -484,7 +485,7 @@ Response (JSON only):"""
             包含原子节点及依赖关系的 AoT 图
         """
         return create_aot_graph(self.llm, goal)
-    
+
     def execute_aot_plan(self, graph: dict) -> list:
         """
         按依赖关系执行一张 AoT 图。
@@ -495,12 +496,13 @@ Response (JSON only):"""
         Returns:
             执行结果的列表
         """
+
         def execute_action(action: str):
             # 实际动作执行的占位实现
             return f"Executed: {action}"
-        
+
         return execute_graph(graph, execute_action)
-    
+
     # ============================================================
     # 主运行方法（随课程演进）
     # ============================================================
@@ -519,9 +521,9 @@ Response (JSON only):"""
             agent 的回复
         """
         result = self.run_with_memory(user_input)
-        
+
         if result and "reply" in result:
             return result["reply"]
-        
+
         # 回退到简单生成
         return self.generate_with_role(user_input)

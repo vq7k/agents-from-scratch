@@ -67,7 +67,7 @@ No explanations. No markdown. No extra text.
 Schema:
 {schema}
 
-Content:
+内容:
 {content}"""
 
 
@@ -86,16 +86,16 @@ def decision_prompt(choices: list[str], user_input: str) -> str:
     """
     options = "\n".join(f"- {choice}" for choice in choices)
     
-    return f"""You must choose ONE of the following options.
+    return f"""你必须从以下选项中选择一个。
 Return ONLY valid JSON.
 
-Available choices:
+可选项:
 {options}
 
 Schema:
 {{ "decision": string }}
 
-Input:
+输入:
 {user_input}"""
 
 
@@ -112,9 +112,9 @@ def tool_call_prompt(tools: dict, user_input: str) -> str:
     Returns:
         请求一次 tool call 的 prompt
     """
-    return f"""You may request ONE tool call.
+    return f"""你可以请求一次工具调用。
 
-Available tools:
+可用工具:
 {tools}
 
 Return ONLY valid JSON.
@@ -125,7 +125,7 @@ Schema:
   "arguments": object
 }}
 
-User request:
+用户请求:
 {user_input}"""
 
 
@@ -142,12 +142,12 @@ def agent_step_prompt(state: dict, user_input: str) -> str:
     Returns:
         用于执行 Agent 单步的 prompt
     """
-    return f"""You are an agent.
+    return f"""你是一个 agent。
 
-Current state:
+当前状态:
 {state}
 
-Decide the next action.
+决定下一个动作。
 
 Return ONLY valid JSON.
 
@@ -157,7 +157,7 @@ Schema:
   "reason": string
 }}
 
-User input:
+用户输入:
 {user_input}"""
 
 
@@ -175,15 +175,15 @@ def memory_prompt(state: dict, memory: list, user_input: str) -> str:
     Returns:
         带记忆上下文的 prompt
     """
-    return f"""You are an agent with memory.
+    return f"""你是一个带记忆的 agent。
 
-Current state:
+当前状态:
 {state}
 
-Relevant memory:
+相关记忆:
 {memory}
 
-Decide what to do next.
+决定接下来做什么。
 
 Return ONLY valid JSON.
 
@@ -193,7 +193,7 @@ Schema:
   "save_to_memory": string | null
 }}
 
-User input:
+用户输入:
 {user_input}"""
 
 
@@ -209,7 +209,7 @@ def planning_prompt(goal: str) -> str:
     Returns:
         用于生成规划的 prompt
     """
-    return f"""Create a step-by-step plan to achieve the goal.
+    return f"""制定一个分步骤的计划来达成目标。
 
 Return ONLY valid JSON.
 
@@ -218,7 +218,7 @@ Schema:
   "steps": [string]
 }}
 
-Goal:
+目标:
 {goal}"""
 
 
@@ -234,7 +234,7 @@ def atomic_action_prompt(step: str) -> str:
     Returns:
         用于生成原子动作的 prompt
     """
-    return f"""Convert this step into an atomic action.
+    return f"""将这个步骤转换为一个原子动作。
 
 Return ONLY valid JSON.
 
@@ -244,7 +244,7 @@ Schema:
   "inputs": object
 }}
 
-Step:
+步骤:
 {step}"""
 
 
@@ -260,7 +260,7 @@ def aot_prompt(goal: str) -> str:
     Returns:
         用于生成 AoT 图的 prompt
     """
-    return f"""Create an atomic execution graph for the goal.
+    return f"""为目标生成一个原子执行图。
 
 Return ONLY valid JSON.
 
@@ -275,5 +275,5 @@ Schema:
   ]
 }}
 
-Goal:
+目标:
 {goal}"""

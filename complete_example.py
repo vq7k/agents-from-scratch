@@ -17,7 +17,7 @@ def lesson_01_basic_chat():
     print("="*50)
     
     agent = Agent("models/llama-3-8b-instruct.gguf")
-    response = agent.simple_generate("Explain what an AI agent is?")
+    response = agent.simple_generate("解释一下什么是 AI agent?")
     print(f"Response: {response}")
 
 
@@ -28,7 +28,7 @@ def lesson_02_with_role():
     print("="*50)
     
     agent = Agent("models/llama-3-8b-instruct.gguf")
-    response = agent.generate_with_role("Explain what an AI agent is?")
+    response = agent.generate_with_role("解释一下什么是 AI agent?")
     print(f"Response: {response}")
 
 
@@ -46,7 +46,7 @@ def lesson_03_structured():
 }"""
 
     result = agent.generate_structured(
-        "Explain quantum computing",
+        "解释一下量子计算",
         schema
     )
     print(f"Structured result: {result}")
@@ -61,7 +61,7 @@ def lesson_04_decisions():
     agent = Agent("models/llama-3-8b-instruct.gguf")
 
     decision = agent.decide(
-        "Can you summarize this article for me?",
+        "你能帮我总结一下这篇文章吗?",
         choices=["answer_question", "summarize_text", "translate"]
     )
     print(f"Decision: {decision}")
@@ -75,7 +75,7 @@ def lesson_05_tools():
 
     agent = Agent("models/llama-3-8b-instruct.gguf")
 
-    tool_call = agent.request_tool("What is 42 * 7?")
+    tool_call = agent.request_tool("42 乘以 7 等于多少?")
     print(f"Tool request: {tool_call}")
 
     if tool_call:
@@ -95,7 +95,7 @@ def lesson_06_agent_loop():
     print("The agent refines its understanding step by step and may repeat analysis")
     print("before converging on a clearer explanation.\n")
     
-    results = agent.run_loop("Help me understand loops", max_steps=3)
+    results = agent.run_loop("帮我理解循环", max_steps=3)
     
     for i, result in enumerate(results, 1):
         print(f"Iteration {i}:")
@@ -116,7 +116,7 @@ def lesson_07_memory():
     agent = Agent("models/llama-3-8b-instruct.gguf")
 
     # 第一次交互——存储名字
-    response1 = agent.run_with_memory("My name is Alice")
+    response1 = agent.run_with_memory("我叫小爱")
     if response1 and "reply" in response1:
         print(f"Response 1: {response1['reply']}")
         if response1.get("save_to_memory"):
@@ -125,7 +125,7 @@ def lesson_07_memory():
         print(f"Response 1: {response1}")
 
     # 第二次交互——回忆名字
-    response2 = agent.run_with_memory("What's my name?")
+    response2 = agent.run_with_memory("我叫什么名字?")
     if response2 and "reply" in response2:
         print(f"Response 2: {response2['reply']}")
         if response2.get("save_to_memory"):
@@ -144,7 +144,7 @@ def lesson_08_planning():
 
     agent = Agent("models/llama-3-8b-instruct.gguf")
 
-    plan = agent.create_plan("Write a blog post about AI agents")
+    plan = agent.create_plan("写一篇关于 AI agent 的博客文章")
     print(f"Plan: {plan}")
 
     if plan:
@@ -161,13 +161,13 @@ def lesson_09_atomic_actions():
     agent = Agent("models/llama-3-8b-instruct.gguf")
 
     # 将一个计划步骤转换为原子动作
-    step = "Write an explanation of AI agents"
+    step = "写一段对 AI agent 的讲解"
     atomic_action = agent.create_atomic_action(step)
     print(f"Step: {step}")
     print(f"Atomic action: {atomic_action}")
 
     # 以计划中的某个步骤为例
-    plan = agent.create_plan("Create a tutorial about Python")
+    plan = agent.create_plan("创建一个关于 Python 的教程")
     if plan and "steps" in plan and plan["steps"]:
         first_step = plan["steps"][0]
         atomic_action_from_plan = agent.create_atomic_action(first_step)
@@ -183,7 +183,7 @@ def lesson_10_aot():
 
     agent = Agent("models/llama-3-8b-instruct.gguf")
     
-    graph = agent.create_aot_plan("Research and write article")
+    graph = agent.create_aot_plan("研究并撰写一篇文章")
     print(f"AoT graph: {graph}")
     
     if graph:
@@ -253,7 +253,7 @@ def lesson_12_telemetry():
     print("\n1. Structured output call...")
     start = time.time()
     result1 = agent.generate_structured(
-        "What is Python?", 
+        "Python 是什么?",
         '{"answer": string, "difficulty": "beginner" | "intermediate" | "advanced"}'
     )
     duration1 = (time.time() - start) * 1000
@@ -271,7 +271,7 @@ def lesson_12_telemetry():
     # 操作 2:tool 调用
     print("\n2. Tool call...")
     start = time.time()
-    tool_call = agent.request_tool("What is 15 * 8?")
+    tool_call = agent.request_tool("15 乘以 8 等于多少?")
     duration2 = (time.time() - start) * 1000
     
     telemetry.log_llm_call(
@@ -293,7 +293,7 @@ def lesson_12_telemetry():
     # 操作 3:记忆
     print("\n3. Memory operation...")
     start = time.time()
-    result3 = agent.run_with_memory("My favorite color is blue")
+    result3 = agent.run_with_memory("我最喜欢的颜色是蓝色")
     duration3 = (time.time() - start) * 1000
     
     telemetry.log_llm_call(
@@ -328,17 +328,17 @@ def main():
     try:
         # 注释掉你想跳过的课程
         lesson_01_basic_chat()
-        lesson_02_with_role()
-        lesson_03_structured()
-        lesson_04_decisions()
-        lesson_05_tools()
-        lesson_06_agent_loop()
-        lesson_07_memory()
-        lesson_08_planning()
-        lesson_09_atomic_actions()
-        lesson_10_aot()
-        lesson_11_evals()
-        lesson_12_telemetry()
+        # lesson_02_with_role()
+        # lesson_03_structured()
+        # lesson_04_decisions()
+        # lesson_05_tools()
+        # lesson_06_agent_loop()
+        # lesson_07_memory()
+        # lesson_08_planning()
+        # lesson_09_atomic_actions()
+        # lesson_10_aot()
+        # lesson_11_evals()
+        # lesson_12_telemetry()
         
         print("\n" + "="*50)
         print("All examples completed!")
