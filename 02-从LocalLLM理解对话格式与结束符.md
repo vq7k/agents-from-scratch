@@ -247,11 +247,11 @@ OpenAI SDK  ──调用──▶  远程服务器（如 OpenAI / DeepSeek，HTT
 
 ```
 LocalLLM（本地）：  直接调用模型  →  eos / stop 由调用方处理（需指定 <|im_end|>）
-云端 SDK：          经过服务端    →  服务端处理 eos，只返回"已停止"的标志
+云端 API：          经过服务端    →  服务端处理 eos，只返回"已停止"的标志
                                     （调用方看不到 eos）
 ```
 
-| | LocalLLM（本地） | 云端 SDK（如 OpenAI 兼容接口） |
+| | LocalLLM（本地） | 云端 API / 服务端（如 OpenAI 兼容接口） |
 |---|---|---|
 | 后端 | 本机模型 | 远程服务器 |
 | stop / eos | 调用方设置 `["<\|im_end\|>"]` | 服务端处理，调用方不可见 |
@@ -260,6 +260,21 @@ LocalLLM（本地）：  直接调用模型  →  eos / stop 由调用方处理�
 
 LocalLLM 处于最底层（直接调用模型），底层细节由调用方处理。改用 `create_chat_completion` 或云端 API 时，这些细节由库或服务端处理，调用方不再接触。
 
+### 8.5 补充：别把"客户端 SDK"和"服务端"的职责搞混（常见误解）
+
+第 8.1–8.3 把 LocalLLM 类比成"一个 SDK"，又指出远程 SDK 还要管网络、认证、流式、重试。这容易让人误以为"套对话格式、处理 eos"也是 SDK（客户端库）干的。**不是。** 职责分界是：
+
+| 谁 | 负责什么 |
+|---|---|
+| 客户端 SDK（如 `openai` 库） | 网络（HTTP）、认证（api_key）、重试、超时、流式解析 |
+| 服务端 / 本地推理库的高层接口 | **套对话模板、tokenize、按 eos/stop 截断、抽取回答** |
+
+套模板 / 处理 eos **永远在持有模型的那一端**（服务端，或本地的 `create_chat_completion`），绝不在客户端 SDK——因为 chat completions 的 **API 契约本身就只收 `messages`**，而"该套哪套对话模板"由**服务端的模型配置**决定（闭源服务还不公开）；客户端即便持有 tokenizer（如 OpenAI 自家开源的 `tiktoken`，纯本地数 token），也无从知道要套什么模板。
+
+这点用 DeepSeek 官方 API 文档可直接坐实[^deepseek]：调用方**只传结构化 `messages`（`{role, content}`），文档不要求、也不允许传任何"对话模板 / prompt 格式"**；模型的结束符 eos 通常不会回传给你，你只会拿到一个 `finish_reason`（`stop` = 自然停止或命中你设的 stop 串；`length` = 撞到 max_tokens）。也就是说，**云端 API 把"对话格式 + eos"这层对调用方完全隐藏了**——"拿来就用"时根本意识不到它的存在，只有像 LocalLLM 这样裸调本地模型，这层才暴露出来、需要你亲手处理。
+
+> 这也是为什么本文要从 LocalLLM 讲起：它把云端 API 替你藏起来的东西，原原本本摆在你面前。
+
 ---
 
 ## 脚注（信息源）
@@ -267,3 +282,4 @@ LocalLLM 处于最底层（直接调用模型），底层细节由调用方处�
 [^qwen]: Qwen 官方 `tokenizer_config.json`（`eos_token` = `<|im_end|>`、编号 151645）。<https://huggingface.co/Qwen/Qwen2.5-7B/blob/main/tokenizer_config.json>
 [^hf]: Qwen 概念文档（特殊 token / chat template）。<https://qwen.readthedocs.io/en/latest/getting_started/concepts.html>
 [^openai]: OpenAI API Reference — Chat Completions（返回结构 `choices` / `finish_reason`）。<https://platform.openai.com/docs/api-reference/chat>
+[^deepseek]: DeepSeek 官方 API 文档 — *创建对话补全（Create Chat Completion）*。请求体仅含结构化 `messages`（`role`/`content`），不接受任何对话模板 / prompt 格式；`stop` 为"一个 string 或最多包含 16 个 string 的 list，在遇到这些词时 API 将停止生成"；`finish_reason` 取值含 `stop`（"模型自然停止生成，或遇到 stop 序列中列出的字符串"）与 `length`（"达到 max_tokens 或上下文长度限制"）。<https://api-docs.deepseek.com/zh-cn/api/create-chat-completion>
