@@ -78,10 +78,10 @@ class LocalLLM:
 
         response = self.llm(**kwargs)
 
-        print("=== qwen 原始 response ===")
-        print(response)
-        print("=== 生成文本(strip 前) ===", repr(response["choices"][0]["text"]))
-        print("=== 停止原因 ===", response["choices"][0]["finish_reason"])
+        # print("=== qwen 原始 response ===")
+        # print(response)
+        # print("=== 生成文本(strip 前) ===", repr(response["choices"][0]["text"]))
+        # print("=== 停止原因 ===", response["choices"][0]["finish_reason"])
 
         # === Before Res ===
         # {
