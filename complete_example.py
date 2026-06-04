@@ -86,6 +86,7 @@ def lesson_05_tools():
     agent = Agent(MODEL_PATH)
 
     tool_call = agent.request_tool("42 乘以 7 等于多少?")
+    # tool_call = agent.request_tool("现在几点？")
     print(f"Tool request: {tool_call}")
 
     if tool_call:
@@ -340,8 +341,8 @@ def main():
         # lesson_01_basic_chat()
         # lesson_02_with_role()
         # lesson_03_structured()
-        lesson_04_decisions()
-        # lesson_05_tools()
+        # lesson_04_decisions()
+        lesson_05_tools()
         # lesson_06_agent_loop()
         # lesson_07_memory()
         # lesson_08_planning()

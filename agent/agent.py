@@ -310,8 +310,10 @@ class Agent:
             f"<|im_start|>assistant\n"
         )
 
+        print(f"完整提示词：{prompt}")
         for attempt in range(3):
             response = self.llm.generate(prompt, temperature=0.0)
+            print(f"原始out：{response}")
             parsed = extract_json_from_text(response)
 
             if parsed and "tool" in parsed and "arguments" in parsed:
