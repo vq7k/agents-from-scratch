@@ -139,36 +139,38 @@ class Agent:
         # 【老式 Vicuna 风格】（格式说明见 generate_with_role）保留作对照
         # prompt = f"""{self.system_prompt}
         #
-        # CRITICAL INSTRUCTIONS:
-        # 1. Respond with ONLY valid JSON
-        # 2. No explanations, no markdown, no extra text before or after the JSON
-        # 3. Start your response with {{ and end with }}
+        # 严格要求:
+        # 1. 只输出合法的 JSON
+        # 2. 不要解释、不要 markdown、JSON 前后不要有多余文本
+        # 3. 必须以 {{ 开头、以 }} 结尾
         #
-        # Schema you must follow:
+        # 必须遵循的 schema:
         # {schema}
         #
-        # User request: {user_input}
+        # 用户请求: {user_input}
         #
-        # Response (JSON only):"""
+        # 回复（仅 JSON）:"""
 
         # 【qwen / ChatML 风格】当前启用：system 放角色，user 放指令 + schema + 请求
         prompt = (
             f"<|im_start|>system\n{self.system_prompt}<|im_end|>\n"
             f"<|im_start|>user\n"
-            f"CRITICAL INSTRUCTIONS:\n"
-            f"1. Respond with ONLY valid JSON\n"
-            f"2. No explanations, no markdown, no extra text before or after the JSON\n"
-            f"3. Start your response with {{ and end with }}\n\n"
-            f"Schema you must follow:\n{schema}\n\n"
-            f"User request: {user_input}<|im_end|>\n"
+            f"严格要求:\n"
+            f"1. 只输出合法的 JSON\n"
+            f"2. 不要解释、不要 markdown、JSON 前后不要有多余文本\n"
+            f"3. 必须以 {{ 开头、以 }} 结尾\n\n"
+            f"必须遵循的 schema:\n{schema}\n\n"
+            f"用户请求: {user_input}<|im_end|>\n"
             f"<|im_start|>assistant\n"
         )
 
         # 最多重试 3 次
         for attempt in range(3):
+            print(f"完整 prompt :{prompt}")
             response = self.llm.generate(prompt, temperature=0.0)
+            print(f"原始返回 : {response}")
             parsed = extract_json_from_text(response)
-
+            print(f"格式化后 : {response}")
             if parsed is not None:
                 return parsed
 

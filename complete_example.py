@@ -6,6 +6,7 @@
 它旨在作为各部分如何组合在一起的参考。
 """
 
+import textwrap
 import time
 
 from agent.agent import Agent
@@ -42,6 +43,13 @@ def lesson_03_structured():
 
     agent = Agent(MODEL_PATH)
 
+    # schema:给模型看的 "输出格式说明" , 不是拿去 json.parse 的真 JSON。
+    #   它会被塞进 prompt(见 Agent.generate_structured), 模型照着它产出真正的 JSON。
+    #   写法是 TypeScript 风味的 "伪 schema":
+    #     string       → 这个字段要填一个字符串
+    #     "a" | "b"    → 这个字段只能取列出的值之一(枚举)
+    #   所以这里出现 string、| 是故意的 (标准 JSON 并不允许),因为它的读者是 LLM,不是解析器。
+    #   (三引号里顶格写,是为了发给模型的文本不带多余缩进。)
     schema = """{
   "topic": string,
   "difficulty": "beginner" | "intermediate" | "advanced"
@@ -331,7 +339,7 @@ def main():
         # 注释掉你想跳过的课程
         # lesson_01_basic_chat()
         lesson_02_with_role()
-        # lesson_03_structured()
+        lesson_03_structured()
         # lesson_04_decisions()
         # lesson_05_tools()
         # lesson_06_agent_loop()

@@ -60,19 +60,18 @@ def generate_structured(self, user_input: str, schema: str) -> dict | None:
     Returns:
         解析后的 JSON 字典;若所有重试都失败,则返回 None
     """
-    prompt = f"""{self.system_prompt}
-
-CRITICAL INSTRUCTIONS:
-1. Respond with ONLY valid JSON
-2. No explanations, no markdown, no extra text before or after the JSON
-3. Start your response with {{ and end with }}
-
-Schema you must follow:
-{schema}
-
-User request: {user_input}
-
-Response (JSON only):"""
+    # ChatML 格式(见第 02 课):system 放角色,user 放指令 + schema + 请求
+    prompt = (
+        f"<|im_start|>system\n{self.system_prompt}<|im_end|>\n"
+        f"<|im_start|>user\n"
+        f"严格要求:\n"
+        f"1. 只输出合法的 JSON\n"
+        f"2. 不要解释、不要 markdown、JSON 前后不要有多余文本\n"
+        f"3. 必须以 {{ 开头、以 }} 结尾\n\n"
+        f"必须遵循的 schema:\n{schema}\n\n"
+        f"用户请求: {user_input}<|im_end|>\n"
+        f"<|im_start|>assistant\n"
+    )
     
     # 最多尝试 3 次
     for attempt in range(3):
@@ -86,7 +85,8 @@ Response (JSON only):"""
 ```
 
 注意我们新增了:
-- **强力指令** —— 用「CRITICAL INSTRUCTIONS」明确提出「只输出 JSON」的要求
+- **强力指令** —— 用「严格要求」明确提出「只输出 JSON」,并禁止解释 / markdown / 多余文本
+- **ChatML 格式** —— 沿用第 02 课的 `<|im_start|>...<|im_end|>` 划分 system / user / assistant(Qwen 的母语格式)
 - **temperature 控制** —— 用 `temperature=0.0` 获得更确定、更一致的输出
 - **JSON 提取** —— `extract_json_from_text()` 用来处理模型加了额外文本的情况
 - **重试逻辑** —— 最多尝试 3 次以拿到合法 JSON,把概率性的行为变成可靠的结果
@@ -100,27 +100,24 @@ from agent.agent import Agent
 
 agent = Agent("models/qwen2.5-7b-instruct-abliterated.gguf")
 
-schema = '''
-{
+# schema 是给模型看的"输出格式说明"(伪 schema),不是真 JSON:
+# string 表示填字符串,"a" | "b" 表示只能取其一。
+schema = """{
   "topic": string,
   "difficulty": "beginner" | "intermediate" | "advanced"
-}
-'''
+}"""
 
-result = agent.generate_structured(
-    "Explain quantum computing",
-    schema
-)
+result = agent.generate_structured("解释一下量子计算", schema)
 
 print(result)
-# {"topic": "'quantum computing", "difficulty": "advanced"}
+# {'topic': '量子计算', 'difficulty': 'advanced'}
 ```
 
 ## 这为什么重要
 
 ### 之前(自由文本)
 ```
-Output: "Okay! This task is medium difficulty. I'd suggest building..."
+Output: "好的!这个话题难度中等,我建议你先从基础概念入手……"
 ```
 - 无法解析
 - 不一致
@@ -128,7 +125,7 @@ Output: "Okay! This task is medium difficulty. I'd suggest building..."
 
 ### 之后(结构化)
 ```
-Output: {'topic': 'quantum computing', 'difficulty': 'advanced'}
+Output: {'topic': '量子计算', 'difficulty': 'advanced'}
 ```
 - 可解析
 - 可预测
@@ -155,7 +152,7 @@ Output: {'topic': 'quantum computing', 'difficulty': 'advanced'}
 
 **「模型在 JSON 之前加上了解释」**
 - 使用 `extract_json_from_text()` 辅助函数(它会从文本中找出 JSON)
-- 在 prompt 中强调「ONLY valid JSON」
+- 在 prompt 中强调「只输出合法的 JSON」
 
 **「仍然收到非法的返回」**
 - 调低 temperature 以获得更确定的输出
