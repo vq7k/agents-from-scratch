@@ -198,35 +198,43 @@ class Agent:
         # 【老式 Vicuna 风格】（格式说明见 generate_with_role）保留作对照
         # prompt = f"""{self.system_prompt}
         #
-        # 你必须从以下选项中选择一个。Respond with ONLY valid JSON.
+        # 你必须从以下选项中恰好选择一个。只输出合法的 JSON。
         #
-        # CRITICAL INSTRUCTIONS:
-        # 1. Respond with ONLY valid JSON
-        # 2. No explanations, no markdown, no other text
-        # 3. Start your response with {{ and end with }}
+        # 严格要求:
+        # 1. 只输出合法的 JSON
+        # 2. 不要解释、不要 markdown、JSON 前后不要有多余文本
+        # 3. 必须以 {{ 开头、以 }} 结尾
         #
         # 可选项:
         # {options}
         #
-        # Required JSON format:
+        # 必须遵循的格式:
         # {{"decision": "上述选项之一"}}
         #
         # 用户请求: {user_input}
         #
-        # Response (JSON only):"""
+        # 回复（仅 JSON）:"""
 
-        # 【qwen / ChatML 风格】当前启用
+        # user 段:指令 + 选项 + 请求,用三引号写成「所见即所得」的多行文本
+        instructions = f"""你必须从以下选项中恰好选择一个。只输出合法的 JSON。
+
+严格要求:
+1. 只输出合法的 JSON
+2. 不要解释、不要 markdown、JSON 前后不要有多余文本
+3. 必须以 {{ 开头、以 }} 结尾
+
+可选项:
+{options}
+
+必须遵循的格式:
+{{"decision": "上述选项之一"}}
+
+用户请求: {user_input}"""
+
+        # 【qwen / ChatML 风格】当前启用:套上 ChatML 三段式外壳(格式见 generate_with_role)
         prompt = (
             f"<|im_start|>system\n{self.system_prompt}<|im_end|>\n"
-            f"<|im_start|>user\n"
-            f"你必须从以下选项中选择一个。Respond with ONLY valid JSON.\n\n"
-            f"CRITICAL INSTRUCTIONS:\n"
-            f"1. Respond with ONLY valid JSON\n"
-            f"2. No explanations, no markdown, no other text\n"
-            f"3. Start your response with {{ and end with }}\n\n"
-            f"可选项:\n{options}\n\n"
-            f'Required JSON format:\n{{"decision": "上述选项之一"}}\n\n'
-            f"用户请求: {user_input}<|im_end|>\n"
+            f"<|im_start|>user\n{instructions}<|im_end|>\n"
             f"<|im_start|>assistant\n"
         )
 
@@ -260,36 +268,43 @@ class Agent:
         # 【老式 Vicuna 风格】（格式说明见 generate_with_role）保留作对照
         # prompt = f"""{self.system_prompt}
         #
-        # 你是一个会调用工具的助手,只回答数学问题。Respond with ONLY valid JSON.
+        # 你是一个会调用工具的助手,只回答数学问题。只输出合法的 JSON。
         #
         # 可用工具: calculator
         # - 参数: a (数字), b (数字), operation ("add"、"subtract"、"multiply" 或 "divide")
         #
-        # CRITICAL INSTRUCTIONS:
-        # 1. Respond with ONLY valid JSON
-        # 2. No explanations, no markdown, no other text
-        # 3. Start your response with {{ and end with }}
+        # 严格要求:
+        # 1. 只输出合法的 JSON
+        # 2. 不要解释、不要 markdown、JSON 前后不要有多余文本
+        # 3. 必须以 {{ 开头、以 }} 结尾
         #
-        # Example format:
+        # 示例格式:
         # {{"tool": "calculator", "arguments": {{"a": 42, "b": 7, "operation": "multiply"}}}}
         #
         # 用户请求: {user_input}
         #
-        # Response (JSON only):"""
+        # 回复（仅 JSON）:"""
 
-        # 【qwen / ChatML 风格】当前启用
+        # user 段:工具说明 + 指令 + 请求,用三引号写成「所见即所得」的多行文本
+        instructions = f"""你是一个会调用工具的助手,只回答数学问题。只输出合法的 JSON。
+
+可用工具: calculator
+- 参数: a (数字), b (数字), operation ("add"、"subtract"、"multiply" 或 "divide")
+
+严格要求:
+1. 只输出合法的 JSON
+2. 不要解释、不要 markdown、JSON 前后不要有多余文本
+3. 必须以 {{ 开头、以 }} 结尾
+
+示例格式:
+{{"tool": "calculator", "arguments": {{"a": 42, "b": 7, "operation": "multiply"}}}}
+
+用户请求: {user_input}"""
+
+        # 【qwen / ChatML 风格】当前启用:套上 ChatML 三段式外壳(格式见 generate_with_role)
         prompt = (
             f"<|im_start|>system\n{self.system_prompt}<|im_end|>\n"
-            f"<|im_start|>user\n"
-            f"你是一个会调用工具的助手,只回答数学问题。Respond with ONLY valid JSON.\n\n"
-            f"可用工具: calculator\n"
-            f'- 参数: a (数字), b (数字), operation ("add"、"subtract"、"multiply" 或 "divide")\n\n'
-            f"CRITICAL INSTRUCTIONS:\n"
-            f"1. Respond with ONLY valid JSON\n"
-            f"2. No explanations, no markdown, no other text\n"
-            f"3. Start your response with {{ and end with }}\n\n"
-            f'Example format:\n{{"tool": "calculator", "arguments": {{"a": 42, "b": 7, "operation": "multiply"}}}}\n\n'
-            f"用户请求: {user_input}<|im_end|>\n"
+            f"<|im_start|>user\n{instructions}<|im_end|>\n"
             f"<|im_start|>assistant\n"
         )
 
@@ -335,37 +350,45 @@ class Agent:
         # 【老式 Vicuna 风格】（格式说明见 generate_with_role）保留作对照
         # prompt = f"""{self.system_prompt}
         #
-        # 你是一个 agent,必须决定下一个动作。Respond with ONLY valid JSON.
+        # 你是一个 agent,必须决定下一个动作。只输出合法的 JSON。
         #
         # 当前状态: steps={state_dict.get('steps', 0)}, done={state_dict.get('done', False)}
         #
         # 可用动作: analyze, research, summarize, answer, done
         #
-        # CRITICAL INSTRUCTIONS:
-        # 1. Respond with ONLY valid JSON
-        # 2. No explanations, no markdown, no other text
-        # 3. Start your response with {{ and end with }}
+        # 严格要求:
+        # 1. 只输出合法的 JSON
+        # 2. 不要解释、不要 markdown、JSON 前后不要有多余文本
+        # 3. 必须以 {{ 开头、以 }} 结尾
         #
-        # Required JSON format:
+        # 必须遵循的格式:
         # {{"action": "动作名", "reason": "理由说明"}}
         #
         # 用户输入: {user_input}
         #
-        # Response (JSON only):"""
+        # 回复（仅 JSON）:"""
 
-        # 【qwen / ChatML 风格】当前启用
+        # user 段:状态 + 可用动作 + 指令 + 输入,用三引号写成「所见即所得」的多行文本
+        instructions = f"""你是一个 agent,必须决定下一个动作。只输出合法的 JSON。
+
+当前状态: steps={state_dict.get('steps', 0)}, done={state_dict.get('done', False)}
+
+可用动作: analyze, research, summarize, answer, done
+
+严格要求:
+1. 只输出合法的 JSON
+2. 不要解释、不要 markdown、JSON 前后不要有多余文本
+3. 必须以 {{ 开头、以 }} 结尾
+
+必须遵循的格式:
+{{"action": "动作名", "reason": "理由说明"}}
+
+用户输入: {user_input}"""
+
+        # 【qwen / ChatML 风格】当前启用:套上 ChatML 三段式外壳(格式见 generate_with_role)
         prompt = (
             f"<|im_start|>system\n{self.system_prompt}<|im_end|>\n"
-            f"<|im_start|>user\n"
-            f"你是一个 agent,必须决定下一个动作。Respond with ONLY valid JSON.\n\n"
-            f"当前状态: steps={state_dict.get('steps', 0)}, done={state_dict.get('done', False)}\n\n"
-            f"可用动作: analyze, research, summarize, answer, done\n\n"
-            f"CRITICAL INSTRUCTIONS:\n"
-            f"1. Respond with ONLY valid JSON\n"
-            f"2. No explanations, no markdown, no other text\n"
-            f"3. Start your response with {{ and end with }}\n\n"
-            f'Required JSON format:\n{{"action": "动作名", "reason": "理由说明"}}\n\n'
-            f"用户输入: {user_input}<|im_end|>\n"
+            f"<|im_start|>user\n{instructions}<|im_end|>\n"
             f"<|im_start|>assistant\n"
         )
 
@@ -436,18 +459,18 @@ class Agent:
         # 【老式 Vicuna 风格】（格式说明见 generate_with_role）保留作对照
         # prompt = f"""{self.system_prompt}
         #
-        # 你是一个带记忆的 agent。Respond with ONLY valid JSON.
+        # 你是一个带记忆的 agent。只输出合法的 JSON。
         #
         # {memory_str}
         #
-        # CRITICAL INSTRUCTIONS:
-        # 1. Respond with ONLY valid JSON
-        # 2. No explanations, no markdown, no other text
-        # 3. Start your response with {{ and end with }}
+        # 严格要求:
+        # 1. 只输出合法的 JSON
+        # 2. 不要解释、不要 markdown、JSON 前后不要有多余文本
+        # 3. 必须以 {{ 开头、以 }} 结尾
         # 4. 如果用户告诉你信息(比如名字),把它存入记忆
         # 5. 如果用户问起你记得的事情,用你的记忆来回答
         #
-        # Required JSON format:
+        # 必须遵循的格式:
         # {{"reply": "你的回复文本", "save_to_memory": "要记住的事实" or null}}
         #
         # 示例:
@@ -456,25 +479,33 @@ class Agent:
         #
         # 用户输入: {user_input}
         #
-        # Response (JSON only):"""
+        # 回复（仅 JSON）:"""
 
-        # 【qwen / ChatML 风格】当前启用
+        # user 段:记忆上下文 + 指令 + 示例 + 输入,用三引号写成「所见即所得」的多行文本
+        instructions = f"""你是一个带记忆的 agent。只输出合法的 JSON。
+
+{memory_str}
+
+严格要求:
+1. 只输出合法的 JSON
+2. 不要解释、不要 markdown、JSON 前后不要有多余文本
+3. 必须以 {{ 开头、以 }} 结尾
+4. 如果用户告诉你信息(比如名字),把它存入记忆
+5. 如果用户问起你记得的事情,用你的记忆来回答
+
+必须遵循的格式:
+{{"reply": "你的回复文本", "save_to_memory": "要记住的事实" or null}}
+
+示例:
+- 用户说 "我叫小爱" → {{"reply": "很高兴认识你,小爱!", "save_to_memory": "用户的名字是小爱"}}
+- 用户问 "我叫什么名字?" 而你记得 "用户的名字是小爱" → {{"reply": "你叫小爱", "save_to_memory": null}}
+
+用户输入: {user_input}"""
+
+        # 【qwen / ChatML 风格】当前启用:套上 ChatML 三段式外壳(格式见 generate_with_role)
         prompt = (
             f"<|im_start|>system\n{self.system_prompt}<|im_end|>\n"
-            f"<|im_start|>user\n"
-            f"你是一个带记忆的 agent。Respond with ONLY valid JSON.\n\n"
-            f"{memory_str}\n\n"
-            f"CRITICAL INSTRUCTIONS:\n"
-            f"1. Respond with ONLY valid JSON\n"
-            f"2. No explanations, no markdown, no other text\n"
-            f"3. Start your response with {{ and end with }}\n"
-            f"4. 如果用户告诉你信息(比如名字),把它存入记忆\n"
-            f"5. 如果用户问起你记得的事情,用你的记忆来回答\n\n"
-            f'Required JSON format:\n{{"reply": "你的回复文本", "save_to_memory": "要记住的事实" or null}}\n\n'
-            f"示例:\n"
-            f'- 用户说 "我叫小爱" → {{"reply": "很高兴认识你,小爱!", "save_to_memory": "用户的名字是小爱"}}\n'
-            f'- 用户问 "我叫什么名字?" 而你记得 "用户的名字是小爱" → {{"reply": "你叫小爱", "save_to_memory": null}}\n\n'
-            f"用户输入: {user_input}<|im_end|>\n"
+            f"<|im_start|>user\n{instructions}<|im_end|>\n"
             f"<|im_start|>assistant\n"
         )
 

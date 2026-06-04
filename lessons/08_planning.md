@@ -112,19 +112,19 @@ def create_plan(llm: LocalLLM, goal: str) -> dict | None:
     """
     from shared.utils import extract_json_from_text
     
-    prompt = f"""Create a step-by-step plan to achieve the goal. Respond with ONLY valid JSON.
+    prompt = f"""制定一个分步骤的计划来达成目标。只输出合法的 JSON。
 
-CRITICAL INSTRUCTIONS:
-1. Respond with ONLY valid JSON
-2. No explanations, no markdown, no other text
-3. Start your response with {{ and end with }}
+严格要求:
+1. 只输出合法的 JSON
+2. 不要解释、不要 markdown、JSON 前后不要有多余文本
+3. 必须以 {{ 开头、以 }} 结尾
 
-Required JSON format:
-{{"steps": ["step1", "step2", "step3"]}}
+必须遵循的格式:
+{{"steps": ["步骤1", "步骤2", "步骤3"]}}
 
-Goal: {goal}
+目标: {goal}
 
-Response (JSON only):"""
+回复（仅 JSON）:"""
     
     for attempt in range(3):
         response = llm.generate(prompt, temperature=0.0)

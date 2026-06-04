@@ -23,19 +23,19 @@ def create_plan(llm: LocalLLM, goal: str) -> dict | None:
     """
     from shared.utils import extract_json_from_text
     
-    prompt = f"""制定一个分步骤的计划来达成目标。Respond with ONLY valid JSON.
+    prompt = f"""制定一个分步骤的计划来达成目标。只输出合法的 JSON。
 
-CRITICAL INSTRUCTIONS:
-1. Respond with ONLY valid JSON
-2. No explanations, no markdown, no other text
-3. Start your response with {{ and end with }}
+严格要求:
+1. 只输出合法的 JSON
+2. 不要解释、不要 markdown、JSON 前后不要有多余文本
+3. 必须以 {{ 开头、以 }} 结尾
 
-Required JSON format:
+必须遵循的格式:
 {{"steps": ["步骤1", "步骤2", "步骤3"]}}
 
 目标: {goal}
 
-Response (JSON only):"""
+回复（仅 JSON）:"""
     
     for attempt in range(3):
         response = llm.generate(prompt, temperature=0.0)
@@ -62,14 +62,14 @@ def create_atomic_action(llm: LocalLLM, step: str) -> dict | None:
     """
     from shared.utils import extract_json_from_text
     
-    prompt = f"""将这个步骤转换为一个原子动作。Respond with ONLY valid JSON.
+    prompt = f"""将这个步骤转换为一个原子动作。只输出合法的 JSON。
 
-CRITICAL INSTRUCTIONS:
-1. Respond with ONLY valid JSON
-2. No explanations, no markdown, no other text
-3. Start your response with {{ and end with }}
+严格要求:
+1. 只输出合法的 JSON
+2. 不要解释、不要 markdown、JSON 前后不要有多余文本
+3. 必须以 {{ 开头、以 }} 结尾
 
-Required JSON format:
+必须遵循的格式:
 {{
   "action": "动作名",
   "inputs": {{"参数名": "参数值"}}
@@ -81,7 +81,7 @@ inputs 应该是一个字典,包含该动作所需的参数。
 待转换的步骤:
 {step}
 
-Response (JSON only):"""
+回复（仅 JSON）:"""
     
     for attempt in range(3):
         response = llm.generate(prompt, temperature=0.0)
@@ -108,14 +108,14 @@ def create_aot_graph(llm: LocalLLM, goal: str) -> dict | None:
     """
     from shared.utils import extract_json_from_text
     
-    prompt = f"""为目标生成一个原子执行图。每个节点是一个单一动作。依赖关系用节点 ID 表示。Respond with ONLY valid JSON.
+    prompt = f"""为目标生成一个原子执行图。每个节点是一个单一动作。依赖关系用节点 ID 表示。只输出合法的 JSON。
 
-CRITICAL INSTRUCTIONS:
-1. Respond with ONLY valid JSON
-2. No explanations, no markdown, no other text
-3. Start your response with {{ and end with }}
+严格要求:
+1. 只输出合法的 JSON
+2. 不要解释、不要 markdown、JSON 前后不要有多余文本
+3. 必须以 {{ 开头、以 }} 结尾
 
-Required JSON format:
+必须遵循的格式:
 {{"nodes": [{{"id": "1", "action": "research", "depends_on": []}}, {{"id": "2", "action": "write", "depends_on": ["1"]}}]}}
 
 每个节点必须包含:
@@ -125,7 +125,7 @@ Required JSON format:
 
 目标: {goal}
 
-Response (JSON only):"""
+回复（仅 JSON）:"""
     
     for attempt in range(3):
         response = llm.generate(prompt, temperature=0.0)

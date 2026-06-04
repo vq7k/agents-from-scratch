@@ -63,26 +63,26 @@ def create_atomic_action(llm: LocalLLM, step: str) -> dict | None:
     """
     from shared.utils import extract_json_from_text
     
-    prompt = f"""Convert this step into an atomic action. Respond with ONLY valid JSON.
+    prompt = f"""将这个步骤转换为一个原子动作。只输出合法的 JSON。
 
-CRITICAL INSTRUCTIONS:
-1. Respond with ONLY valid JSON
-2. No explanations, no markdown, no other text
-3. Start your response with {{ and end with }}
+严格要求:
+1. 只输出合法的 JSON
+2. 不要解释、不要 markdown、JSON 前后不要有多余文本
+3. 必须以 {{ 开头、以 }} 结尾
 
-Required JSON format:
+必须遵循的格式:
 {{
-  "action": "action_name",
-  "inputs": {{"key": "value"}}
+  "action": "动作名",
+  "inputs": {{"参数名": "参数值"}}
 }}
 
-The action should be a simple, atomic operation name.
-The inputs should be a dictionary with the parameters needed for this action.
+action 应该是一个简单的、原子化的操作名称。
+inputs 应该是一个字典,包含该动作所需的参数。
 
-Step to convert:
+待转换的步骤:
 {step}
 
-Response (JSON only):"""
+回复（仅 JSON）:"""
     
     for attempt in range(3):
         response = llm.generate(prompt, temperature=0.0)

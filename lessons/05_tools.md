@@ -61,24 +61,28 @@ def request_tool(self, user_input: str) -> dict | None:
     Returns:
         工具调用描述,如果请求失败则返回 None
     """
-    prompt = f"""{self.system_prompt}
+    # user 段:工具说明 + 指令 + 请求,用三引号写成「所见即所得」的多行文本
+    instructions = f"""你是一个会调用工具的助手,只回答数学问题。只输出合法的 JSON。
 
-You are a tool-calling assistant. When asked a math question, you must respond with ONLY valid JSON.
+可用工具: calculator
+- 参数: a (数字), b (数字), operation ("add"、"subtract"、"multiply" 或 "divide")
 
-Available tool: calculator
-- Parameters: a (number), b (number), operation ("add", "subtract", "multiply", or "divide")
+严格要求:
+1. 只输出合法的 JSON
+2. 不要解释、不要 markdown、JSON 前后不要有多余文本
+3. 必须以 {{ 开头、以 }} 结尾
 
-CRITICAL INSTRUCTIONS:
-1. Respond with ONLY valid JSON
-2. No explanations, no markdown, no other text
-3. Start your response with {{ and end with }}
-
-Example format:
+示例格式:
 {{"tool": "calculator", "arguments": {{"a": 42, "b": 7, "operation": "multiply"}}}}
 
-User request: {user_input}
+用户请求: {user_input}"""
 
-Response (JSON only):"""
+    # 套上 ChatML 三段式外壳(格式见第 02 课 / generate_with_role)
+    prompt = (
+        f"<|im_start|>system\n{self.system_prompt}<|im_end|>\n"
+        f"<|im_start|>user\n{instructions}<|im_end|>\n"
+        f"<|im_start|>assistant\n"
+    )
     
     for attempt in range(3):
         response = self.llm.generate(prompt, temperature=0.0)

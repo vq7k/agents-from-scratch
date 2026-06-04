@@ -54,29 +54,24 @@ def create_aot_graph(llm: LocalLLM, goal: str) -> dict | None:
     """
     from shared.utils import extract_json_from_text
     
-    prompt = f"""Create an execution graph to achieve the goal. Respond with ONLY valid JSON.
+    prompt = f"""为目标生成一个原子执行图。每个节点是一个单一动作。依赖关系用节点 ID 表示。只输出合法的 JSON。
 
-CRITICAL INSTRUCTIONS:
-1. Respond with ONLY valid JSON
-2. No explanations, no markdown, no other text
-3. Start your response with {{ and end with }}
+严格要求:
+1. 只输出合法的 JSON
+2. 不要解释、不要 markdown、JSON 前后不要有多余文本
+3. 必须以 {{ 开头、以 }} 结尾
 
-Required JSON format:
-{{
-  "nodes": [
-    {{"id": "1", "action": "action_name", "depends_on": []}},
-    {{"id": "2", "action": "action_name", "depends_on": ["1"]}}
-  ]
-}}
+必须遵循的格式:
+{{"nodes": [{{"id": "1", "action": "research", "depends_on": []}}, {{"id": "2", "action": "write", "depends_on": ["1"]}}]}}
 
-Each node must have:
-- "id": unique identifier (string)
-- "action": what to do (string)
-- "depends_on": list of node IDs that must complete first (list of strings)
+每个节点必须包含:
+- id: 唯一的字符串,例如 "1"、"2"、"3"
+- action: 要做的事情(例如 "research"、"write"、"review")
+- depends_on: 必须先完成的节点 ID 列表(第一步用空列表 [])
 
-Goal: {goal}
+目标: {goal}
 
-Response (JSON only):"""
+回复（仅 JSON）:"""
     
     for attempt in range(3):
         response = llm.generate(prompt, temperature=0.0)

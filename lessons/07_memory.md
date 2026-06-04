@@ -61,33 +61,36 @@ def run_with_memory(self, user_input: str) -> dict | None:
     
     # 构建记忆上下文字符串
     if memory_context:
-        memory_str = "You remember the following:\n" + "\n".join(f"- {item}" for item in memory_context)
+        memory_str = "你记得以下内容:\n" + "\n".join(f"- {item}" for item in memory_context)
     else:
-        memory_str = "You have no memories yet."
+        memory_str = "你目前还没有任何记忆。"
     
-    prompt = f"""{self.system_prompt}
-
-You are an agent with memory. You must respond with ONLY valid JSON.
+    instructions = f"""你是一个带记忆的 agent。只输出合法的 JSON。
 
 {memory_str}
 
-CRITICAL INSTRUCTIONS:
-1. Respond with ONLY valid JSON
-2. No explanations, no markdown, no other text
-3. Start your response with {{ and end with }}
-4. If the user tells you information (like their name), save it to memory
-5. If the user asks about something you remember, USE YOUR MEMORY to answer
+严格要求:
+1. 只输出合法的 JSON
+2. 不要解释、不要 markdown、JSON 前后不要有多余文本
+3. 必须以 {{ 开头、以 }} 结尾
+4. 如果用户告诉你信息(比如名字),把它存入记忆
+5. 如果用户问起你记得的事情,用你的记忆来回答
 
-Required JSON format:
-{{"reply": "your response text", "save_to_memory": "fact to remember" or null}}
+必须遵循的格式:
+{{"reply": "你的回复文本", "save_to_memory": "要记住的事实" or null}}
 
-Examples:
-- User says "My name is Alice" -> {{"reply": "Nice to meet you, Alice!", "save_to_memory": "User's name is Alice"}}
-- User asks "What's my name?" and you remember "User's name is Alice" -> {{"reply": "Your name is Alice", "save_to_memory": null}}
+示例:
+- 用户说 "我叫小爱" → {{"reply": "很高兴认识你,小爱!", "save_to_memory": "用户的名字是小爱"}}
+- 用户问 "我叫什么名字?" 而你记得 "用户的名字是小爱" → {{"reply": "你叫小爱", "save_to_memory": null}}
 
-User input: {user_input}
+用户输入: {user_input}"""
 
-Response (JSON only):"""
+    # 套上 ChatML 三段式外壳(格式见第 02 课 / generate_with_role)
+    prompt = (
+        f"<|im_start|>system\n{self.system_prompt}<|im_end|>\n"
+        f"<|im_start|>user\n{instructions}<|im_end|>\n"
+        f"<|im_start|>assistant\n"
+    )
     
     for attempt in range(3):
         response = self.llm.generate(prompt, temperature=0.0)

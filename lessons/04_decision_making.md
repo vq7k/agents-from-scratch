@@ -48,37 +48,41 @@
 ```python
 def decide(self, user_input: str, choices: list[str]) -> str | None:
     """
-    让模型从一组有限的选项中做出选择。
+    让模型从有限的选项集合中做出选择。
     
     第 04 课版本。
     
     Args:
-        user_input: 需要做决策的输入
+        user_input: 需要据此做决策的输入
         choices: 可选动作/决策的列表
         
     Returns:
-        选中的动作;若决策失败,则返回 None
+        选中的动作;若决策失败则返回 None
     """
     options = "\n".join(f"- {choice}" for choice in choices)
     
-    prompt = f"""{self.system_prompt}
+    # user 段:指令 + 选项 + 请求,用三引号写成「所见即所得」的多行文本
+    instructions = f"""你必须从以下选项中恰好选择一个。只输出合法的 JSON。
 
-You must choose ONE of the following options. Respond with ONLY valid JSON.
+严格要求:
+1. 只输出合法的 JSON
+2. 不要解释、不要 markdown、JSON 前后不要有多余文本
+3. 必须以 {{ 开头、以 }} 结尾
 
-CRITICAL INSTRUCTIONS:
-1. Respond with ONLY valid JSON
-2. No explanations, no markdown, no other text
-3. Start your response with {{ and end with }}
-
-Available choices:
+可选项:
 {options}
 
-Required JSON format:
-{{"decision": "one_of_the_choices_above"}}
+必须遵循的格式:
+{{"decision": "上述选项之一"}}
 
-User request: {user_input}
+用户请求: {user_input}"""
 
-Response (JSON only):"""
+    # 套上 ChatML 三段式外壳(格式见第 02 课 / generate_with_role)
+    prompt = (
+        f"<|im_start|>system\n{self.system_prompt}<|im_end|>\n"
+        f"<|im_start|>user\n{instructions}<|im_end|>\n"
+        f"<|im_start|>assistant\n"
+    )
     
     for attempt in range(3):
         response = self.llm.generate(prompt, temperature=0.0)
@@ -95,6 +99,7 @@ Response (JSON only):"""
 注意我们新增了:
 - **有限的选择空间** —— 模型必须从一个预定义的列表中挑选,而不是随意生成
 - **校验** —— 我们会检查这个决策是否真的在选项列表里
+- **ChatML 格式** —— 沿用第 02 课的 `<|im_start|>...<|im_end|>` 划分 system / user / assistant(Qwen 的母语格式)
 - **结构化输出** —— 沿用第 03 课中相同的 JSON 提取模式
 - **重试逻辑** —— 最多尝试 3 次以拿到一个合法的决策
 
@@ -108,28 +113,28 @@ from agent.agent import Agent
 agent = Agent("models/qwen2.5-7b-instruct-abliterated.gguf")
 
 decision = agent.decide(
-    "Can you summarize this article for me?",
+    "你能帮我总结一下这篇文章吗?",
     choices=["answer_question", "summarize_text", "translate"]
 )
 
-print(decision)
-# Output: "summarize_text"
+print(f"Decision: {decision}")
+# Decision: summarize_text
 ```
 
 ## 与第 03 课对比
 
 **第 03 课(结构化输出):**
 ```
-Input: "What is AI?"
-Output: {"answer": "AI is...", "confidence": "high"}
+输入:"什么是 AI?"
+输出:{"answer": "AI 是……", "confidence": "high"}
 ```
 模型生成结构化数据,其中的值是它自己创造出来的。
 
 **第 04 课(决策):**
 ```
-Input: "Summarize this article"
-Choices: ["answer_question", "summarize_text", "translate"]
-Output: "summarize_text"
+输入:"帮我总结这篇文章"
+选项:["answer_question", "summarize_text", "translate"]
+输出:"summarize_text"
 ```
 模型从预定义的选项中做选择——不生成,只挑选。
 

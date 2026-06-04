@@ -63,25 +63,29 @@ def agent_step(self, user_input: str) -> dict | None:
     """
     state_dict = self.state.to_dict()
     
-    prompt = f"""{self.system_prompt}
+    # user 段:状态 + 可用动作 + 指令 + 输入,用三引号写成「所见即所得」的多行文本
+    instructions = f"""你是一个 agent,必须决定下一个动作。只输出合法的 JSON。
 
-You are an agent. You must decide the next action and respond with ONLY valid JSON.
+当前状态: steps={state_dict.get('steps', 0)}, done={state_dict.get('done', False)}
 
-Current state: steps={state_dict.get('steps', 0)}, done={state_dict.get('done', False)}
+可用动作: analyze, research, summarize, answer, done
 
-Available actions: analyze, research, summarize, answer, done
+严格要求:
+1. 只输出合法的 JSON
+2. 不要解释、不要 markdown、JSON 前后不要有多余文本
+3. 必须以 {{ 开头、以 }} 结尾
 
-CRITICAL INSTRUCTIONS:
-1. Respond with ONLY valid JSON
-2. No explanations, no markdown, no other text
-3. Start your response with {{ and end with }}
+必须遵循的格式:
+{{"action": "动作名", "reason": "理由说明"}}
 
-Required JSON format:
-{{"action": "action_name", "reason": "explanation"}}
+用户输入: {user_input}"""
 
-User input: {user_input}
-
-Response (JSON only):"""
+    # 套上 ChatML 三段式外壳(格式见第 02 课 / generate_with_role)
+    prompt = (
+        f"<|im_start|>system\n{self.system_prompt}<|im_end|>\n"
+        f"<|im_start|>user\n{instructions}<|im_end|>\n"
+        f"<|im_start|>assistant\n"
+    )
     
     for attempt in range(3):
         response = self.llm.generate(prompt, temperature=0.0)
