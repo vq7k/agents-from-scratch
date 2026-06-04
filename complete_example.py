@@ -338,9 +338,9 @@ def main():
     try:
         # 注释掉你想跳过的课程
         # lesson_01_basic_chat()
-        lesson_02_with_role()
-        lesson_03_structured()
-        # lesson_04_decisions()
+        # lesson_02_with_role()
+        # lesson_03_structured()
+        lesson_04_decisions()
         # lesson_05_tools()
         # lesson_06_agent_loop()
         # lesson_07_memory()

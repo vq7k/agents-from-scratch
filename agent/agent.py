@@ -194,6 +194,7 @@ class Agent:
             选中的动作；若决策失败则返回 None
         """
         options = "\n".join(f"- {choice}" for choice in choices)
+        print(f"可选决策：{options}")
 
         # 【老式 Vicuna 风格】（格式说明见 generate_with_role）保留作对照
         # prompt = f"""{self.system_prompt}
@@ -237,9 +238,10 @@ class Agent:
             f"<|im_start|>user\n{instructions}<|im_end|>\n"
             f"<|im_start|>assistant\n"
         )
-
+        print(f"完整提示词：{prompt}")
         for attempt in range(3):
             response = self.llm.generate(prompt, temperature=0.0)
+            print(f"原始回复：{response}")
             parsed = extract_json_from_text(response)
 
             if parsed and "decision" in parsed:
