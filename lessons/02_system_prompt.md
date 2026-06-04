@@ -21,15 +21,15 @@
 
 系统提示词示例:
 ```
-"You are a calm, precise teacher who explains concepts simply."
+"你是一位冷静、严谨的老师,会用简单的方式讲解概念。"
 ```
 
 ```
-"You are a creative writer who uses vivid imagery."
+"你是一位富有创造力的作者,擅长运用生动的意象。"
 ```
 
 ```
-"You are a code reviewer who finds bugs and suggests improvements."
+"你是一位代码审查者,会找出 bug 并提出改进建议。"
 ```
 
 ### 2. 指令层级(Instruction Hierarchy)
@@ -39,6 +39,8 @@
 2. **用户提示词** —— 实际的问题或请求
 
 系统提示词拥有更高的「优先级」——它指导模型如何理解用户提示词。
+
+在我们用的 ChatML 格式里,这个层级是**显式**写进 prompt 的:`<|im_start|>system` 段就是第一层、`<|im_start|>user` 段就是第二层,模型靠这两个特殊 token 一眼区分谁说的话。
 
 ### 3. 行为塑造(Behavior Shaping)
 
@@ -64,26 +66,43 @@
 
 ```python
 def generate_with_role(self, user_input: str) -> str:
-    """
-    带系统提示词生成,用以塑造行为。
-    """
-    # 使用一种不会让模型混乱的格式
-    prompt = f"""{self.system_prompt}
-
-User: {user_input}
-Assistant:"""
-    
+    """带系统提示词生成,用以塑造行为。"""
+    # 【qwen / ChatML 风格】当前启用
+    prompt = (
+        f"<|im_start|>system\n{self.system_prompt}<|im_end|>\n"
+        f"<|im_start|>user\n{user_input}<|im_end|>\n"
+        f"<|im_start|>assistant\n"
+    )
     response = self.llm.generate(prompt)
-    # 清理掉可能出现的标签残留
+    # 防御性清理:万一模型吐出标签碎片就抹掉(ChatML 下一般用不上)
     response = response.replace('<SYSTEM>', '').replace('</SYSTEM>', '')
     response = response.replace('<USER>', '').replace('</USER>', '')
     return response.strip()
 ```
 
-注意我们新增了:
-- 把系统提示词放在开头
-- 用一个简单的「User:」/「Assistant:」格式来组织对话
-- 加入清理代码,移除可能出现的标签残留
+注意这里用的是 **ChatML** 格式,靠 `<|im_start|>` / `<|im_end|>` 这两个特殊 token 来标记每段话是谁说的:
+- `system` 段放系统提示词(角色设定)
+- `user` 段放用户输入
+- 末尾留一个空的 `assistant` 段 —— 等模型来补全
+
+### 为什么不是「User: / Assistant:」?
+
+这个项目的早期版本曾经这样拼 prompt:
+
+```python
+# 【老式 Vicuna / Llama-2 风格】—— 我们的模型不认
+prompt = f"""{self.system_prompt}
+
+User: {user_input}
+Assistant:"""
+```
+
+这种纯文本的「User:/Assistant:」是老式 Vicuna / Llama-2 的写法。**但我们的模型其实是 Qwen2.5-7B**,它训练时学的对话模板是 ChatML(`<|im_start|>...<|im_end|>`,是词表里的特殊 token,不是普通文字)。喂它没学过的格式,它认不出「谁在说话、该在哪停」,表现就是续写用户的话、角色串台、停不下来。
+
+`shared/llm.py` 里的 `stop=["<|im_end|>"]` 和这里的 prompt 是**配套**的:prompt 让模型按 ChatML 输出,模型每段说完会吐出 `<|im_end|>`,stop 一看到就截断。两边格式必须一致才生效。
+
+> 想彻底搞懂「对话格式与结束符到底由谁决定」,看仓库根目录的
+> [`02-从LocalLLM理解对话格式与结束符.md`](../02-从LocalLLM理解对话格式与结束符.md)。
 
 ## 如何运行
 
@@ -92,12 +111,14 @@ Assistant:"""
 ```python
 from agent.agent import Agent
 
-agent = Agent("models/llama-3-8b-instruct.gguf")
+# 我们用的模型是 Qwen2.5-7B(abliterated 去审查版)。
+agent = Agent("models/qwen2.5-7b-instruct-abliterated.gguf")
 
-# 这个 agent 有一个默认的系统提示词:
-# "You are a calm, precise, and helpful AI assistant..."
+# 这个 agent 有一个默认的中文系统提示词:
+# "你是一个冷静、严谨、乐于助人的 AI 助手。你用简单的方式解释概念,
+#  避免不必要的术语。你对自己知道和不知道的事情都保持诚实。始终用中文回答。"
 
-response = agent.generate_with_role("What is an AI agent?")
+response = agent.generate_with_role("解释一下什么是 AI agent?")
 print(response)
 ```
 
@@ -105,14 +126,14 @@ print(response)
 
 **不带系统提示词([第 01 课](01_basic_llm_chat.md)):**
 ```
-Input: "What is an AI agent?"
-Output: "An AI agent is a system that perceives its environment and acts autonomously to achieve specified goals. It processes information, makes decisions, and can adapt to changing conditions using machine learning algorithms..."
+Input: "解释一下什么是 AI agent?"
+Output: "AI agent 是一种能够感知环境、并自主采取行动以达成既定目标的系统。它处理信息、做出决策,并能借助机器学习算法适应变化的条件……"(偏学术、信息密集)
 ```
 
 **带系统提示词:**
 ```
-Input: "What is an AI agent?"
-Output: "Think of an AI agent as a helpful assistant that can observe what's happening around it and take actions to help you accomplish tasks. Like how a thermostat watches the temperature and adjusts heating automatically - but much more sophisticated."
+Input: "解释一下什么是 AI agent?"
+Output: "你可以把 AI agent 想象成一个能干的助手:它会观察周围发生了什么,再采取行动帮你完成任务。就像恒温器盯着温度、自动调节供暖那样 —— 只是聪明得多。"(更口语、用类比)
 ```
 
 同样的问题。同样的模型。不同的行为。
@@ -121,17 +142,17 @@ Output: "Think of an AI agent as a helpful assistant that can observe what's hap
 
 ### 示例 1:技术专家
 ```python
-agent.system_prompt = "You are a senior software engineer who explains concepts with code examples."
+agent.system_prompt = "你是一位资深软件工程师,讲解概念时总会配上代码示例。"
 ```
 
 ### 示例 2:ELI5(像对 5 岁小孩那样解释)
 ```python
-agent.system_prompt = "You explain complex topics using simple words and everyday analogies."
+agent.system_prompt = "你用简单的词汇和日常生活的类比来解释复杂的话题。"
 ```
 
 ### 示例 3:简洁回应者
 ```python
-agent.system_prompt = "You give accurate answers in 1-2 sentences maximum. No elaboration unless asked."
+agent.system_prompt = "你只用最多 1-2 句话给出准确的回答。除非被要求,否则不展开。"
 ```
 
 ## 关键洞见
@@ -157,24 +178,24 @@ agent.system_prompt = "You give accurate answers in 1-2 sentences maximum. No el
 
 ### 1. 角色定义
 ```
-You are a [role] who [behavior].
+你是一位[角色],会[行为]。
 ```
 
 ### 2. 设定约束
 ```
-You must [requirement]. You never [prohibition].
+你必须[要求]。你绝不[禁止事项]。
 ```
 
 ### 3. 输出格式
 ```
-Always respond with [format]. Use [style].
+始终用[格式]回应。使用[风格]。
 ```
 
 ### 4. 组合使用
 ```
-You are a helpful assistant. 
-You explain concepts clearly using examples.
-You keep responses under 100 words unless asked to elaborate.
+你是一个乐于助人的助手。
+你用示例把概念讲清楚。
+除非被要求展开,否则把回复控制在 100 字以内。
 ```
 
 ## 常见问题

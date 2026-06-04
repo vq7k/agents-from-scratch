@@ -194,7 +194,7 @@ from evals.golden_datasets import (
     MEMORY_GOLDEN
 )
 
-agent = Agent("models/llama-3-8b-instruct.gguf")
+agent = Agent("models/qwen2.5-7b-instruct-abliterated.gguf")
 evaluator = AgentEval(agent)
 
 # 运行全部评估

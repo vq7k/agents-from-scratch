@@ -62,9 +62,11 @@ def simple_generate(self, user_input: str) -> str:
 ```python
 from agent.agent import Agent
 
-agent = Agent("models/llama-3-8b-instruct.gguf")
+# 我们用的模型是 Qwen2.5-7B(abliterated 去审查版)。模型身份在第 02 课很关键
+# —— 不同模型认的对话格式不一样。
+agent = Agent("models/qwen2.5-7b-instruct-abliterated.gguf")
 
-response = agent.simple_generate("What is an AI agent?")
+response = agent.simple_generate("解释一下什么是 AI agent?")
 print(response)
 ```
 
@@ -96,9 +98,10 @@ print(response)
 **「回复被截断了」**
 - 在 `shared/llm.py` 中调大 `max_tokens`
 
-**「模型在重复自己」**
-- 对于补全类模型,这很正常
-- 我们会在[第 02 课](02_system_prompt.md)用更好的 prompt 来解决它
+**「模型停不下来 / 在重复自己」**
+- 这一课的 `simple_generate` 把你的文本**裸**喂给模型,没有任何对话格式包装
+- 我们的模型是 Qwen,它训练时学的是 ChatML 格式(`<|im_start|>...<|im_end|>`);喂裸文本时它认不出该在哪结束,就容易一直写到 `max_tokens` 或开始重复
+- [第 02 课](02_system_prompt.md)会用正确的格式包装 prompt 来解决它
 
 **「回复和 prompt 对不上」**
 - 有些模型需要特定的格式

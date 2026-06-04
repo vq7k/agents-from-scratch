@@ -145,7 +145,7 @@ class Telemetry:
 from agent.agent import Agent
 from agent.telemetry import Telemetry
 
-agent = Agent("models/llama-3-8b-instruct.gguf")
+agent = Agent("models/qwen2.5-7b-instruct-abliterated.gguf")
 telemetry = Telemetry()
 
 # 开启一个 trace

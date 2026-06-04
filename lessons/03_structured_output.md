@@ -98,7 +98,7 @@ Response (JSON only):"""
 ```python
 from agent.agent import Agent
 
-agent = Agent("models/llama-3-8b-instruct.gguf")
+agent = Agent("models/qwen2.5-7b-instruct-abliterated.gguf")
 
 schema = '''
 {

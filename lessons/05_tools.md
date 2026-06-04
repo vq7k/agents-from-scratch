@@ -115,7 +115,7 @@ def execute_tool_call(self, tool_call: dict) -> Any:
 ```python
 from agent.agent import Agent
 
-agent = Agent("models/llama-3-8b-instruct.gguf")
+agent = Agent("models/qwen2.5-7b-instruct-abliterated.gguf")
 
 tool_call = agent.request_tool("What is 42 * 7?")
 print(f"Tool request: {tool_call}")

@@ -6,12 +6,11 @@ import os
 
 import pytest
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
+from shared.config import MODEL_PATH
 
 
 @pytest.fixture(scope="session")
 def model_path():
-    p = os.path.join(ROOT, "models", "llama-3-8b-instruct.gguf")
-    if not os.path.exists(p):
-        pytest.skip(f"模型文件不存在，跳过：{p}")
-    return p
+    if not os.path.exists(MODEL_PATH):
+        pytest.skip(f"模型文件不存在，跳过：{MODEL_PATH}")
+    return MODEL_PATH

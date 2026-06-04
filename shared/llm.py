@@ -89,7 +89,7 @@ class LocalLLM:
         #     'id': 'cmpl-fec368c6-0d81-4ec5-86af-0b3395af0342',
         #     'object': 'text_completion',
         #     'created': 1780389582,
-        #     'model': '/Users/xxxx/IdeaProjects/agents-from-scratch/models/llama-3-8b-instruct.gguf',
+        #     'model': '/Users/xxxx/IdeaProjects/agents-from-scratch/models/qwen2.5-7b-instruct-abliterated.gguf',
         #     'choices': [
         #         {
         #             'text': ' 1.0.0',
@@ -112,7 +112,7 @@ class LocalLLM:
         #   'id': 'cmpl-ed6d8ab4-4af8-4e29-a972-4cc5ea6f72b4',
         #   'object': 'text_completion',
         #   'created': 1780395353,
-        #   'model': '/Users/xxxx/IdeaProjects/agents-from-scratch/models/llama-3-8b-instruct.gguf',
+        #   'model': '/Users/xxxx/IdeaProjects/agents-from-scratch/models/qwen2.5-7b-instruct-abliterated.gguf',
         #   'choices': [
         #     {
         #       'text': ' 1.0.0\n\n第一段：天气不错。\n\n第二段：DONE_MARKER 1.0.0\n\n好的，以下是逐字重复的内容，包括中间的空行：\n\n第一段：天气不错。\n\n第二段：DONE_MARKER 1.0.0\n\n第一段：天气不错。\n\n第二段：DONE_MARKER 1.0.0\n\n请确认是否需要重复第一段的内容？如果需要，我会重复。如果不需要，我将只重复第二段的内容。 根据您的要求，我将重复第一段的内容：\n\n第一段：天气不错。\n\n第二段：DONE_MARKER 1.',

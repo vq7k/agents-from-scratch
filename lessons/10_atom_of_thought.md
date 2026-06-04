@@ -151,7 +151,7 @@ def execute_aot_plan(self, graph: dict) -> list:
 ```python
 from agent.agent import Agent
 
-agent = Agent("models/llama-3-8b-instruct.gguf")
+agent = Agent("models/qwen2.5-7b-instruct-abliterated.gguf")
 
 graph = agent.create_aot_plan("Research and write article")
 print(f"AoT graph: {graph}")

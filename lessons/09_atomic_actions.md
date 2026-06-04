@@ -125,7 +125,7 @@ def create_atomic_action(self, step: str) -> dict | None:
 ```python
 from agent.agent import Agent
 
-agent = Agent("models/llama-3-8b-instruct.gguf")
+agent = Agent("models/qwen2.5-7b-instruct-abliterated.gguf")
 
 # 把一个计划步骤转换成原子动作
 step = "Write an explanation of AI agents"

@@ -78,7 +78,7 @@ response["choices"][0]["text"]     ③ 取出生成的文本
 
 ### 3.1 模型真身是 qwen2.5
 
-这台机器上加载的 GGUF 文件名为 `llama-3-8b-instruct.gguf`，但文件内容是 qwen2.5。文件名只是标签（复制时沿用了旧名），不代表内容。判断模型类型应依据文件内容，不能依据文件名。
+这台机器上加载的 GGUF 文件名为 `qwen2.5-7b-instruct-abliterated.gguf`，但文件内容是 qwen2.5。文件名只是标签（复制时沿用了旧名），不代表内容。判断模型类型应依据文件内容，不能依据文件名。
 
 ### 3.2 默认 stop 是老式 Vicuna / Llama-2 风格
 

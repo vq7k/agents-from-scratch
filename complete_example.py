@@ -7,7 +7,9 @@
 """
 
 import time
+
 from agent.agent import Agent
+from shared.config import MODEL_PATH
 
 
 def lesson_01_basic_chat():
@@ -16,7 +18,7 @@ def lesson_01_basic_chat():
     print("LESSON 01: Basic LLM Chat")
     print("="*50)
     
-    agent = Agent("models/llama-3-8b-instruct.gguf")
+    agent = Agent(MODEL_PATH)
     response = agent.simple_generate("解释一下什么是 AI agent?")
     print(f"Response: {response}")
 
@@ -27,7 +29,7 @@ def lesson_02_with_role():
     print("LESSON 02: With System Prompt")
     print("="*50)
     
-    agent = Agent("models/llama-3-8b-instruct.gguf")
+    agent = Agent(MODEL_PATH)
     response = agent.generate_with_role("解释一下什么是 AI agent?")
     print(f"Response: {response}")
 
@@ -38,7 +40,7 @@ def lesson_03_structured():
     print("LESSON 03: Structured Output")
     print("="*50)
 
-    agent = Agent("models/llama-3-8b-instruct.gguf")
+    agent = Agent(MODEL_PATH)
 
     schema = """{
   "topic": string,
@@ -58,7 +60,7 @@ def lesson_04_decisions():
     print("LESSON 04: Decision Making")
     print("="*50)
 
-    agent = Agent("models/llama-3-8b-instruct.gguf")
+    agent = Agent(MODEL_PATH)
 
     decision = agent.decide(
         "你能帮我总结一下这篇文章吗?",
@@ -73,7 +75,7 @@ def lesson_05_tools():
     print("LESSON 05: Tool Calling")
     print("="*50)
 
-    agent = Agent("models/llama-3-8b-instruct.gguf")
+    agent = Agent(MODEL_PATH)
 
     tool_call = agent.request_tool("42 乘以 7 等于多少?")
     print(f"Tool request: {tool_call}")
@@ -89,7 +91,7 @@ def lesson_06_agent_loop():
     print("LESSON 06: Agent Loop")
     print("="*50)
     
-    agent = Agent("models/llama-3-8b-instruct.gguf")
+    agent = Agent(MODEL_PATH)
     
     print("\nNote: Repetition in early iterations is expected.")
     print("The agent refines its understanding step by step and may repeat analysis")
@@ -113,7 +115,7 @@ def lesson_07_memory():
     print("LESSON 07: Memory")
     print("="*50)
 
-    agent = Agent("models/llama-3-8b-instruct.gguf")
+    agent = Agent(MODEL_PATH)
 
     # 第一次交互——存储名字
     response1 = agent.run_with_memory("我叫小爱")
@@ -142,7 +144,7 @@ def lesson_08_planning():
     print("LESSON 08: Planning")
     print("="*50)
 
-    agent = Agent("models/llama-3-8b-instruct.gguf")
+    agent = Agent(MODEL_PATH)
 
     plan = agent.create_plan("写一篇关于 AI agent 的博客文章")
     print(f"Plan: {plan}")
@@ -158,7 +160,7 @@ def lesson_09_atomic_actions():
     print("LESSON 09: Atomic Actions")
     print("="*50)
 
-    agent = Agent("models/llama-3-8b-instruct.gguf")
+    agent = Agent(MODEL_PATH)
 
     # 将一个计划步骤转换为原子动作
     step = "写一段对 AI agent 的讲解"
@@ -181,7 +183,7 @@ def lesson_10_aot():
     print("LESSON 10: Atom of Thought")
     print("="*50)
 
-    agent = Agent("models/llama-3-8b-instruct.gguf")
+    agent = Agent(MODEL_PATH)
     
     graph = agent.create_aot_plan("研究并撰写一篇文章")
     print(f"AoT graph: {graph}")
@@ -205,7 +207,7 @@ def lesson_11_evals():
         MEMORY_GOLDEN
     )
     
-    agent = Agent("models/llama-3-8b-instruct.gguf")
+    agent = Agent(MODEL_PATH)
     evaluator = AgentEval(agent)
     
     print("\nRunning eval suites...")
@@ -237,7 +239,7 @@ def lesson_12_telemetry():
     
     from agent.telemetry import Telemetry
     
-    agent = Agent("models/llama-3-8b-instruct.gguf")
+    agent = Agent(MODEL_PATH)
     telemetry = Telemetry(log_file="agent_telemetry.jsonl")
     
     # 清除之前的 telemetry,保证演示干净

@@ -117,7 +117,7 @@ Response (JSON only):"""
 ```python
 from agent.agent import Agent
 
-agent = Agent("models/llama-3-8b-instruct.gguf")
+agent = Agent("models/qwen2.5-7b-instruct-abliterated.gguf")
 
 # 第一次交互——存储名字
 response1 = agent.run_with_memory("My name is Alice")

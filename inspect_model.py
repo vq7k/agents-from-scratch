@@ -3,11 +3,9 @@
 用法：在 IDEA 里右键这个文件 → Run（普通运行就行，不用 pytest）。约 1 秒。
 原理：GGUF 模型文件里记着它自己的特殊 token，llama_cpp 能直接读出来。
 """
-import os
-
 from llama_cpp import Llama
 
-MODEL = os.path.join(os.path.dirname(__file__), "models", "llama-3-8b-instruct.gguf")
+from shared.config import MODEL_PATH as MODEL
 
 # vocab_only=True：只加载词表，不加载几 GB 权重，所以很快
 llm = Llama(MODEL, vocab_only=True, verbose=False)

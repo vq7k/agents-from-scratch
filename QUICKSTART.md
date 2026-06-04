@@ -29,7 +29,7 @@ pip install llama-cpp-python
 1. 打开 https://huggingface.co/bartowski/Meta-Llama-3-8B-Instruct-GGUF
 2. 下载 `Meta-Llama-3-8B-Instruct-Q4_K_M.gguf`(约 5GB)
 3. 把它放到 `models/` 目录下
-4. 将其重命名为 `llama-3-8b-instruct.gguf`(可选,为了简化）
+4. 将其重命名为 `qwen2.5-7b-instruct-abliterated.gguf`(可选,为了简化）
 
 **可选的其他模型:**
 - Mistral 7B:https://huggingface.co/bartowski/Mistral-7B-Instruct-v0.2-GGUF

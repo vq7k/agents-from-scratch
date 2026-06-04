@@ -137,7 +137,7 @@ def run_loop(self, user_input: str, max_steps: int = 5):
 ```python
 from agent.agent import Agent
 
-agent = Agent("models/llama-3-8b-instruct.gguf")
+agent = Agent("models/qwen2.5-7b-instruct-abliterated.gguf")
 
 print("\nNote: Repetition in early iterations is expected.")
 print("The agent refines its understanding step by step and may repeat analysis")
