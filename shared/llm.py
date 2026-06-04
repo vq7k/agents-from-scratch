@@ -65,6 +65,7 @@ class LocalLLM:
 
         # 老式 Vicuna / Llama-2 风格
         # assistant_ = ["</s>", "\n\n", "User:", "Assistant:"]
+        # qwen 风格
         assistant_ = ["<|im_end|>"]
 
         kwargs = {

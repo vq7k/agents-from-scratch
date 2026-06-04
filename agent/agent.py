@@ -93,15 +93,25 @@ class Agent:
         Returns:
             带有角色化行为的模型回复
         """
-        # FIXME（qwen 适配）：手拼的 "User:/Assistant:" 是老式 Vicuna 风格，不是 qwen 的母语。
-        #   qwen 标准是 ChatML：<|im_start|>user\n{内容}<|im_end|>\n<|im_start|>assistant\n
-        #   本项目其它拼 prompt 的方法（generate_structured / decide / request_tool /
-        #   agent_step / run_with_memory）同理——都假设了 User:/Assistant: 格式。
-        # 使用一种不会让模型混淆的格式
-        prompt = f"""{self.system_prompt}
+        # —— prompt 格式：两个版本对照（本项目所有拼 prompt 的方法都按这套路改）——
+        # 为什么改：llm.generate 走「文本补全」接口，模型只看到我们拼的纯文本，没人帮套
+        # 对话格式。指令模型靠训练时那套模板的分隔符判断「轮到我说话 / 该在哪停」。qwen 的
+        # 母语是 ChatML，用特殊 token <|im_start|>/<|im_end|> 划分角色；喂它老式
+        # "User:/Assistant:" 会认不出角色和结束符 → 续写 / 串台 / 停不下来。
+        # （llm.py 的 stop 已是 ChatML 的 <|im_end|>，prompt 这边必须配套才生效。）
 
-        User: {user_input}
-        Assistant:"""
+        # 【老式 Vicuna / Llama-2 风格】纯文本分隔符，qwen 不认（保留作对照）
+        # prompt = f"""{self.system_prompt}
+        #
+        #     User: {user_input}
+        #     Assistant:"""
+
+        # 【qwen / ChatML 风格】当前启用
+        prompt = (
+            f"<|im_start|>system\n{self.system_prompt}<|im_end|>\n"
+            f"<|im_start|>user\n{user_input}<|im_end|>\n"
+            f"<|im_start|>assistant\n"
+        )
 
         response = self.llm.generate(prompt)
         # 清理可能残留的标签碎片
@@ -126,19 +136,33 @@ class Agent:
         Returns:
             解析后的 JSON 字典；若所有重试都失败则返回 None
         """
-        prompt = f"""{self.system_prompt}
+        # 【老式 Vicuna 风格】（格式说明见 generate_with_role）保留作对照
+        # prompt = f"""{self.system_prompt}
+        #
+        # CRITICAL INSTRUCTIONS:
+        # 1. Respond with ONLY valid JSON
+        # 2. No explanations, no markdown, no extra text before or after the JSON
+        # 3. Start your response with {{ and end with }}
+        #
+        # Schema you must follow:
+        # {schema}
+        #
+        # User request: {user_input}
+        #
+        # Response (JSON only):"""
 
-CRITICAL INSTRUCTIONS:
-1. Respond with ONLY valid JSON
-2. No explanations, no markdown, no extra text before or after the JSON
-3. Start your response with {{ and end with }}
-
-Schema you must follow:
-{schema}
-
-User request: {user_input}
-
-Response (JSON only):"""
+        # 【qwen / ChatML 风格】当前启用：system 放角色，user 放指令 + schema + 请求
+        prompt = (
+            f"<|im_start|>system\n{self.system_prompt}<|im_end|>\n"
+            f"<|im_start|>user\n"
+            f"CRITICAL INSTRUCTIONS:\n"
+            f"1. Respond with ONLY valid JSON\n"
+            f"2. No explanations, no markdown, no extra text before or after the JSON\n"
+            f"3. Start your response with {{ and end with }}\n\n"
+            f"Schema you must follow:\n{schema}\n\n"
+            f"User request: {user_input}<|im_end|>\n"
+            f"<|im_start|>assistant\n"
+        )
 
         # 最多重试 3 次
         for attempt in range(3):
@@ -169,24 +193,40 @@ Response (JSON only):"""
         """
         options = "\n".join(f"- {choice}" for choice in choices)
 
-        prompt = f"""{self.system_prompt}
+        # 【老式 Vicuna 风格】（格式说明见 generate_with_role）保留作对照
+        # prompt = f"""{self.system_prompt}
+        #
+        # 你必须从以下选项中选择一个。Respond with ONLY valid JSON.
+        #
+        # CRITICAL INSTRUCTIONS:
+        # 1. Respond with ONLY valid JSON
+        # 2. No explanations, no markdown, no other text
+        # 3. Start your response with {{ and end with }}
+        #
+        # 可选项:
+        # {options}
+        #
+        # Required JSON format:
+        # {{"decision": "上述选项之一"}}
+        #
+        # 用户请求: {user_input}
+        #
+        # Response (JSON only):"""
 
-你必须从以下选项中选择一个。Respond with ONLY valid JSON.
-
-CRITICAL INSTRUCTIONS:
-1. Respond with ONLY valid JSON
-2. No explanations, no markdown, no other text
-3. Start your response with {{ and end with }}
-
-可选项:
-{options}
-
-Required JSON format:
-{{"decision": "上述选项之一"}}
-
-用户请求: {user_input}
-
-Response (JSON only):"""
+        # 【qwen / ChatML 风格】当前启用
+        prompt = (
+            f"<|im_start|>system\n{self.system_prompt}<|im_end|>\n"
+            f"<|im_start|>user\n"
+            f"你必须从以下选项中选择一个。Respond with ONLY valid JSON.\n\n"
+            f"CRITICAL INSTRUCTIONS:\n"
+            f"1. Respond with ONLY valid JSON\n"
+            f"2. No explanations, no markdown, no other text\n"
+            f"3. Start your response with {{ and end with }}\n\n"
+            f"可选项:\n{options}\n\n"
+            f'Required JSON format:\n{{"decision": "上述选项之一"}}\n\n'
+            f"用户请求: {user_input}<|im_end|>\n"
+            f"<|im_start|>assistant\n"
+        )
 
         for attempt in range(3):
             response = self.llm.generate(prompt, temperature=0.0)
@@ -215,24 +255,41 @@ Response (JSON only):"""
         Returns:
             tool call 的规格说明；若请求失败则返回 None
         """
-        prompt = f"""{self.system_prompt}
+        # 【老式 Vicuna 风格】（格式说明见 generate_with_role）保留作对照
+        # prompt = f"""{self.system_prompt}
+        #
+        # 你是一个会调用工具的助手,只回答数学问题。Respond with ONLY valid JSON.
+        #
+        # 可用工具: calculator
+        # - 参数: a (数字), b (数字), operation ("add"、"subtract"、"multiply" 或 "divide")
+        #
+        # CRITICAL INSTRUCTIONS:
+        # 1. Respond with ONLY valid JSON
+        # 2. No explanations, no markdown, no other text
+        # 3. Start your response with {{ and end with }}
+        #
+        # Example format:
+        # {{"tool": "calculator", "arguments": {{"a": 42, "b": 7, "operation": "multiply"}}}}
+        #
+        # 用户请求: {user_input}
+        #
+        # Response (JSON only):"""
 
-你是一个会调用工具的助手,只回答数学问题。Respond with ONLY valid JSON.
-
-可用工具: calculator
-- 参数: a (数字), b (数字), operation ("add"、"subtract"、"multiply" 或 "divide")
-
-CRITICAL INSTRUCTIONS:
-1. Respond with ONLY valid JSON
-2. No explanations, no markdown, no other text
-3. Start your response with {{ and end with }}
-
-Example format:
-{{"tool": "calculator", "arguments": {{"a": 42, "b": 7, "operation": "multiply"}}}}
-
-用户请求: {user_input}
-
-Response (JSON only):"""
+        # 【qwen / ChatML 风格】当前启用
+        prompt = (
+            f"<|im_start|>system\n{self.system_prompt}<|im_end|>\n"
+            f"<|im_start|>user\n"
+            f"你是一个会调用工具的助手,只回答数学问题。Respond with ONLY valid JSON.\n\n"
+            f"可用工具: calculator\n"
+            f'- 参数: a (数字), b (数字), operation ("add"、"subtract"、"multiply" 或 "divide")\n\n'
+            f"CRITICAL INSTRUCTIONS:\n"
+            f"1. Respond with ONLY valid JSON\n"
+            f"2. No explanations, no markdown, no other text\n"
+            f"3. Start your response with {{ and end with }}\n\n"
+            f'Example format:\n{{"tool": "calculator", "arguments": {{"a": 42, "b": 7, "operation": "multiply"}}}}\n\n'
+            f"用户请求: {user_input}<|im_end|>\n"
+            f"<|im_start|>assistant\n"
+        )
 
         for attempt in range(3):
             response = self.llm.generate(prompt, temperature=0.0)
@@ -273,25 +330,42 @@ Response (JSON only):"""
         """
         state_dict = self.state.to_dict()
 
-        prompt = f"""{self.system_prompt}
+        # 【老式 Vicuna 风格】（格式说明见 generate_with_role）保留作对照
+        # prompt = f"""{self.system_prompt}
+        #
+        # 你是一个 agent,必须决定下一个动作。Respond with ONLY valid JSON.
+        #
+        # 当前状态: steps={state_dict.get('steps', 0)}, done={state_dict.get('done', False)}
+        #
+        # 可用动作: analyze, research, summarize, answer, done
+        #
+        # CRITICAL INSTRUCTIONS:
+        # 1. Respond with ONLY valid JSON
+        # 2. No explanations, no markdown, no other text
+        # 3. Start your response with {{ and end with }}
+        #
+        # Required JSON format:
+        # {{"action": "动作名", "reason": "理由说明"}}
+        #
+        # 用户输入: {user_input}
+        #
+        # Response (JSON only):"""
 
-你是一个 agent,必须决定下一个动作。Respond with ONLY valid JSON.
-
-当前状态: steps={state_dict.get('steps', 0)}, done={state_dict.get('done', False)}
-
-可用动作: analyze, research, summarize, answer, done
-
-CRITICAL INSTRUCTIONS:
-1. Respond with ONLY valid JSON
-2. No explanations, no markdown, no other text
-3. Start your response with {{ and end with }}
-
-Required JSON format:
-{{"action": "动作名", "reason": "理由说明"}}
-
-用户输入: {user_input}
-
-Response (JSON only):"""
+        # 【qwen / ChatML 风格】当前启用
+        prompt = (
+            f"<|im_start|>system\n{self.system_prompt}<|im_end|>\n"
+            f"<|im_start|>user\n"
+            f"你是一个 agent,必须决定下一个动作。Respond with ONLY valid JSON.\n\n"
+            f"当前状态: steps={state_dict.get('steps', 0)}, done={state_dict.get('done', False)}\n\n"
+            f"可用动作: analyze, research, summarize, answer, done\n\n"
+            f"CRITICAL INSTRUCTIONS:\n"
+            f"1. Respond with ONLY valid JSON\n"
+            f"2. No explanations, no markdown, no other text\n"
+            f"3. Start your response with {{ and end with }}\n\n"
+            f'Required JSON format:\n{{"action": "动作名", "reason": "理由说明"}}\n\n'
+            f"用户输入: {user_input}<|im_end|>\n"
+            f"<|im_start|>assistant\n"
+        )
 
         for attempt in range(3):
             response = self.llm.generate(prompt, temperature=0.0)
@@ -357,29 +431,50 @@ Response (JSON only):"""
         else:
             memory_str = "你目前还没有任何记忆。"
 
-        prompt = f"""{self.system_prompt}
+        # 【老式 Vicuna 风格】（格式说明见 generate_with_role）保留作对照
+        # prompt = f"""{self.system_prompt}
+        #
+        # 你是一个带记忆的 agent。Respond with ONLY valid JSON.
+        #
+        # {memory_str}
+        #
+        # CRITICAL INSTRUCTIONS:
+        # 1. Respond with ONLY valid JSON
+        # 2. No explanations, no markdown, no other text
+        # 3. Start your response with {{ and end with }}
+        # 4. 如果用户告诉你信息(比如名字),把它存入记忆
+        # 5. 如果用户问起你记得的事情,用你的记忆来回答
+        #
+        # Required JSON format:
+        # {{"reply": "你的回复文本", "save_to_memory": "要记住的事实" or null}}
+        #
+        # 示例:
+        # - 用户说 "我叫小爱" → {{"reply": "很高兴认识你,小爱!", "save_to_memory": "用户的名字是小爱"}}
+        # - 用户问 "我叫什么名字?" 而你记得 "用户的名字是小爱" → {{"reply": "你叫小爱", "save_to_memory": null}}
+        #
+        # 用户输入: {user_input}
+        #
+        # Response (JSON only):"""
 
-你是一个带记忆的 agent。Respond with ONLY valid JSON.
-
-{memory_str}
-
-CRITICAL INSTRUCTIONS:
-1. Respond with ONLY valid JSON
-2. No explanations, no markdown, no other text
-3. Start your response with {{ and end with }}
-4. 如果用户告诉你信息(比如名字),把它存入记忆
-5. 如果用户问起你记得的事情,用你的记忆来回答
-
-Required JSON format:
-{{"reply": "你的回复文本", "save_to_memory": "要记住的事实" or null}}
-
-示例:
-- 用户说 "我叫小爱" → {{"reply": "很高兴认识你,小爱!", "save_to_memory": "用户的名字是小爱"}}
-- 用户问 "我叫什么名字?" 而你记得 "用户的名字是小爱" → {{"reply": "你叫小爱", "save_to_memory": null}}
-
-用户输入: {user_input}
-
-Response (JSON only):"""
+        # 【qwen / ChatML 风格】当前启用
+        prompt = (
+            f"<|im_start|>system\n{self.system_prompt}<|im_end|>\n"
+            f"<|im_start|>user\n"
+            f"你是一个带记忆的 agent。Respond with ONLY valid JSON.\n\n"
+            f"{memory_str}\n\n"
+            f"CRITICAL INSTRUCTIONS:\n"
+            f"1. Respond with ONLY valid JSON\n"
+            f"2. No explanations, no markdown, no other text\n"
+            f"3. Start your response with {{ and end with }}\n"
+            f"4. 如果用户告诉你信息(比如名字),把它存入记忆\n"
+            f"5. 如果用户问起你记得的事情,用你的记忆来回答\n\n"
+            f'Required JSON format:\n{{"reply": "你的回复文本", "save_to_memory": "要记住的事实" or null}}\n\n'
+            f"示例:\n"
+            f'- 用户说 "我叫小爱" → {{"reply": "很高兴认识你,小爱!", "save_to_memory": "用户的名字是小爱"}}\n'
+            f'- 用户问 "我叫什么名字?" 而你记得 "用户的名字是小爱" → {{"reply": "你叫小爱", "save_to_memory": null}}\n\n'
+            f"用户输入: {user_input}<|im_end|>\n"
+            f"<|im_start|>assistant\n"
+        )
 
         for attempt in range(3):
             response = self.llm.generate(prompt, temperature=0.0)
