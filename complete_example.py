@@ -102,12 +102,13 @@ def lesson_06_agent_loop():
     
     agent = Agent(MODEL_PATH)
     
-    print("\nNote: Repetition in early iterations is expected.")
-    print("The agent refines its understanding step by step and may repeat analysis")
-    print("before converging on a clearer explanation.\n")
+    print("\n注意:前几轮迭代出现重复是正常的。")
+    print("Agent 会一步步打磨自己的理解,可能会重复分析,")
+    print("然后才收敛到更清晰、更明确的解释。\n")
     
-    results = agent.run_loop("帮我理解循环", max_steps=3)
-    
+    # results = agent.run_loop("帮我理解循环", max_steps=3)
+    results = agent.run_loop("帮我理解 Agent", max_steps=10)
+
     for i, result in enumerate(results, 1):
         print(f"Iteration {i}:")
         action = result.get("action", "unknown")
@@ -342,8 +343,8 @@ def main():
         # lesson_02_with_role()
         # lesson_03_structured()
         # lesson_04_decisions()
-        lesson_05_tools()
-        # lesson_06_agent_loop()
+        # lesson_05_tools()
+        lesson_06_agent_loop()
         # lesson_07_memory()
         # lesson_08_planning()
         # lesson_09_atomic_actions()
