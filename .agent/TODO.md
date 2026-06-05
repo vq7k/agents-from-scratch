@@ -2,6 +2,7 @@
 
 ## 当前
 - [ ] 确认下一步方向：lesson7 memory（`lessons/07_memory.md` + `agent/agent.py:443 run_with_memory`）or 收尾 lesson4-5 调试 print / demo 切换 — 需 user 拍板
+- [ ] 本次遗留待拍：06a §2.1 ASCII 图删 / 留（仍在不生效的 `<details>` 内）；是否把「少用 `<details>`、改文末附录 / 选读」补进全局图表规则
 
 ## Backlog / 候选
 - lesson7-12 答疑笔记沉淀（正文中文化已到 lesson10，答疑笔记现到 lesson6）
