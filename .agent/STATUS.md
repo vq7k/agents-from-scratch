@@ -7,7 +7,7 @@ lesson1-5 已中文化 + 答疑笔记完成并 push 到 `origin/zh-cn`。**下�
 lesson 中文化 + 答疑笔记推进中（已到 lesson5 / 共 12 课），分支 zh-cn。
 
 ## 最近一次 session
-2026-06-05 · 用 `init-agent-teams` skill 给本仓嵌入 Agent teams 治理层（单 agent 起步：`.agent/` 三件套 + PROJECT/CLAUDE/AGENTS + catch-up/status-update skills）。
+2026-06-05 · `init-agent-teams` 嵌入治理层（单 agent 起步）+ 沉淀 5 份 decisions ADR / 12 条 learned-rules → commit `39f9405`。归档见 `.agent/sessions/2026-06-05-init-agent-teams/outputs.md`。
 上一轮（06-04）：lesson4-5 决策与工具调用答疑笔记（`05-*.md`）、decide/request_tool 加调试 print、prompt 全面中文化（lesson4-10）、demo 切到 lesson5。
 
 ## 阻塞
